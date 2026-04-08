@@ -120,7 +120,7 @@ print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
 
 # Keep running
 await idle()
-```
+
 
 if **name** == '**main**':
 try:
