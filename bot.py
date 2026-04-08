@@ -122,7 +122,7 @@ print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
 await idle()
 
 
-if **name** == '**main**':
+if __name__ == '__main__':
     try:
         loop.run_until_complete(start())
     except KeyboardInterrupt:
