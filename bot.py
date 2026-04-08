@@ -40,6 +40,21 @@ loop = asyncio.get_event_loop()
 async def start():
     print('\n🚀 Initializing Your Bot')
 
+    print("🔥 Starting Web Server FIRST...")
+
+    app = web.AppRunner(await web_server())
+    await app.setup()
+
+    bind_address = "0.0.0.0"
+
+    print("🌐 PORT FROM RAILWAY:", PORT)
+
+    site = web.TCPSite(app, bind_address, PORT)
+    await site.start()
+
+    print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
+
+    # NOW start bot
     bot_info = await TechVJBot.get_me()
     await initialize_clients()
 
