@@ -44,14 +44,14 @@ async def start():
 
     app = web.AppRunner(await web_server())
     await app.setup()
-
+    
     bind_address = "0.0.0.0"
-
+    
     print("🌐 PORT FROM RAILWAY:", PORT)
-
+    
     site = web.TCPSite(app, bind_address, PORT)
     await site.start()
-
+    
     print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
 
     # NOW start bot
