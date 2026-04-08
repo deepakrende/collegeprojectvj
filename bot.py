@@ -117,7 +117,7 @@ async def start():
         print("Restarting All Clone Bots.......")
         await restart_bots()
         print("Restarted All Clone Bots.")
-
+    await idle()
     
 
 
