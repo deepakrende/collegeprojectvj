@@ -123,7 +123,7 @@ await idle()
 
 
 if **name** == '**main**':
-try:
-loop.run_until_complete(start())
-except KeyboardInterrupt:
-logging.info('Service Stopped Bye 👋')
+    try:
+        loop.run_until_complete(start())
+    except KeyboardInterrupt:
+        logging.info('Service Stopped Bye 👋')
