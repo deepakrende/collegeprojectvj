@@ -41,7 +41,7 @@ loop = asyncio.get_event_loop()
 async def start():
 print('\n🚀 Initializing Your Bot')
 
-```
+
 bot_info = await TechVJBot.get_me()
 await initialize_clients()
 
@@ -116,7 +116,8 @@ await site.start()
 print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
 
 await idle()
-```
+
+
 
 
 
