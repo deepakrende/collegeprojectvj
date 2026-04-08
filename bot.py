@@ -1,29 +1,28 @@
 # Don't Remove Credit @VJ_Bots
+
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
+
 # Ask Doubt on telegram @KingVJ01
 
-# Clone Code Credit : YT - @Tech_VJ / TG - @VJ_Bots / GitHub - @VJBots
-
 import os
-
 PORT = int(os.environ.get("PORT", 8080))
 
 import sys, glob, importlib, logging, logging.config, pytz, asyncio
 from pathlib import Path
 
-# Get logging configurations
+# Logging
+
 logging.config.fileConfig('logging.conf')
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 logging.getLogger("cinemagoer").setLevel(logging.ERROR)
 
-from pyrogram import Client, idle
+from pyrogram import idle
 from database.users_chats_db import db
 from info import *
 from utils import temp
-from typing import Union, Optional, AsyncGenerator
-from Script import script 
-from datetime import date, datetime 
+from Script import script
+from datetime import date, datetime
 from aiohttp import web
 from plugins import web_server
 from plugins.clone import restart_bots
@@ -34,14 +33,14 @@ from TechVJ.bot.clients import initialize_clients
 
 ppath = "plugins/*.py"
 files = glob.glob(ppath)
+
 TechVJBot.start()
 loop = asyncio.get_event_loop()
-
 
 async def start():
 print('\n🚀 Initializing Your Bot')
 
-
+```
 bot_info = await TechVJBot.get_me()
 await initialize_clients()
 
@@ -58,9 +57,11 @@ for name in files:
         sys.modules["plugins." + plugin_name] = load
         print("Tech VJ Imported => " + plugin_name)
 
+# Keep alive (optional)
 if ON_HEROKU:
     asyncio.create_task(ping_server())
 
+# DB
 b_users, b_chats = await db.get_banned()
 temp.BANNED_USERS = b_users
 temp.BANNED_CHATS = b_chats
@@ -73,6 +74,7 @@ temp.B_NAME = me.first_name
 
 logging.info(script.LOGO)
 
+# Restart logs
 tz = pytz.timezone('Asia/Kolkata')
 today = date.today()
 now = datetime.now(tz)
@@ -96,11 +98,13 @@ try:
 except:
     print("Make Your Bot Admin In Force Subscribe Channel With Full Rights")
 
+# Clone bots
 if CLONE_MODE:
     print("Restarting All Clone Bots.......")
     await restart_bots()
     print("Restarted All Clone Bots.")
 
+# Start Web Server
 print("🔥 Starting Web Server...")
 
 app = web.AppRunner(await web_server())
@@ -115,19 +119,12 @@ await site.start()
 
 print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
 
+# Keep running
 await idle()
+```
 
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    try:
-        loop.run_until_complete(start())
-    except KeyboardInterrupt:
-        logging.info('Service Stopped Bye 👋')
-
-
+if **name** == '**main**':
+try:
+loop.run_until_complete(start())
+except KeyboardInterrupt:
+logging.info('Service Stopped Bye 👋')
