@@ -8,12 +8,6 @@ from .route import routes
 async def web_server():
     web_app = web.Application(client_max_size=30000000)
 
-    # ✅ ADD THIS PART
-    async def root(request):
-        return web.Response(text="Bot is running")
-
-    web_app.router.add_get("/", root)
-
     # existing routes
     web_app.add_routes(routes)
 
