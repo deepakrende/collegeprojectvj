@@ -118,23 +118,7 @@ async def start():
         await restart_bots()
         print("Restarted All Clone Bots.")
 
-    # Start Web Server
-    print("🔥 Starting Web Server...")
     
-    app = web.AppRunner(await web_server())
-    await app.setup()
-    
-    bind_address = "0.0.0.0"
-    
-    print("🌐 PORT FROM RAILWAY:", PORT)
-    
-    site = web.TCPSite(app, bind_address, PORT)
-    await site.start()
-    
-    print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
-    
-    # Keep running
-    await idle()
 
 
 if __name__ == '__main__':
