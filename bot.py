@@ -58,11 +58,9 @@ for name in files:
         sys.modules["plugins." + plugin_name] = load
         print("Tech VJ Imported => " + plugin_name)
 
-# Keepalive (optional)
 if ON_HEROKU:
     asyncio.create_task(ping_server())
 
-# DB setup
 b_users, b_chats = await db.get_banned()
 temp.BANNED_USERS = b_users
 temp.BANNED_CHATS = b_chats
@@ -75,7 +73,6 @@ temp.B_NAME = me.first_name
 
 logging.info(script.LOGO)
 
-# Restart logs
 tz = pytz.timezone('Asia/Kolkata')
 today = date.today()
 now = datetime.now(tz)
@@ -99,13 +96,11 @@ try:
 except:
     print("Make Your Bot Admin In Force Subscribe Channel With Full Rights")
 
-# Clone bots
 if CLONE_MODE:
     print("Restarting All Clone Bots.......")
     await restart_bots()
     print("Restarted All Clone Bots.")
 
-# ✅ START WEB SERVER (FIXED)
 print("🔥 Starting Web Server...")
 
 app = web.AppRunner(await web_server())
@@ -120,9 +115,9 @@ await site.start()
 
 print(f"✅ Web Server Running on http://0.0.0.0:{PORT}")
 
-# Keep bot alive
 await idle()
 ```
+
 
 
 
