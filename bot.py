@@ -4,6 +4,10 @@
 
 # Clone Code Credit : YT - @Tech_VJ / TG - @VJ_Bots / GitHub - @VJBots
 
+import os
+
+PORT = int(os.environ.get("PORT", 8080))
+
 import sys, glob, importlib, logging, logging.config, pytz, asyncio
 from pathlib import Path
 
