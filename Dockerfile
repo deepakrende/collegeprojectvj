@@ -3,8 +3,7 @@
 # Ask Doubt on telegram @KingVJ01
 
 FROM python:3.10-slim-bookworm
-RUN apt-get update && apt-get install -y gcc ffmpeg && rm -rf /var/lib/apt/lists/*
-RUN apt install git -y
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /requirements.txt
 
 RUN cd /
