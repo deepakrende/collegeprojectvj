@@ -52,7 +52,9 @@ async def index_files(bot, query):
         chat = int(chat)
     except:
         chat = chat
-    await index_files_to_db(int(lst_msg_id), chat, msg, bot)
+
+    # ✅ FIX: Run indexing as a background task so bot stays responsive
+    asyncio.create_task(index_files_to_db(int(lst_msg_id), chat, msg, bot))
 
 
 @Client.on_message(filters.private & filters.command('index'))
@@ -69,7 +71,7 @@ async def send_for_index(bot, message):
         chat_id = match.group(4)
         last_msg_id = int(match.group(5))
         if chat_id.isnumeric():
-            chat_id  = int(("-100" + chat_id))
+            chat_id = int(("-100" + chat_id))
     else:
         return
     try:
@@ -148,19 +150,47 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             temp.CANCEL = False
             async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
                 if temp.CANCEL:
-                    await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
+                    await msg.edit(
+                        f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\n"
+                        f"Duplicate Files Skipped: <code>{duplicate}</code>\n"
+                        f"Deleted Messages Skipped: <code>{deleted}</code>\n"
+                        f"Non-Media messages skipped: <code>{no_media + unsupported}</code>"
+                        f"(Unsupported Media - `{unsupported}` )\n"
+                        f"Errors Occurred: <code>{errors}</code>"
+                    )
                     break
+
                 current += 1
+
+                # ✅ FIX 1: Yield control every single iteration
+                # This lets other users' messages get processed immediately
+                await asyncio.sleep(0)
+
+                # ✅ FIX 2: Every 5 messages, sleep a tiny bit longer
+                # This gives the event loop enough breathing room for
+                # other handlers (searches, /start, etc.) to respond fast
+                if current % 5 == 0:
+                    await asyncio.sleep(0.05)
+
                 if current % 30 == 0:
                     can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                     reply = InlineKeyboardMarkup(can)
                     try:
                         await msg.edit_text(
-                            text=f"Total messages fetched: <code>{current}</code>\nTotal messages saved: <code>{total_files}</code>\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>",
+                            text=(
+                                f"Total messages fetched: <code>{current}</code>\n"
+                                f"Total messages saved: <code>{total_files}</code>\n"
+                                f"Duplicate Files Skipped: <code>{duplicate}</code>\n"
+                                f"Deleted Messages Skipped: <code>{deleted}</code>\n"
+                                f"Non-Media messages skipped: <code>{no_media + unsupported}</code>"
+                                f"(Unsupported Media - `{unsupported}` )\n"
+                                f"Errors Occurred: <code>{errors}</code>"
+                            ),
                             reply_markup=reply
                         )
                     except MessageNotModified:
                         pass
+
                 if message.empty:
                     deleted += 1
                     continue
@@ -175,18 +205,36 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     unsupported += 1
                     continue
                 media.caption = message.caption
+
+                # ✅ FIX 3: Yield after every DB save too (MongoDB calls block briefly)
                 aynav, vnay = await save_file(media)
+                await asyncio.sleep(0)
+
                 if aynav:
                     total_files += 1
                 elif vnay == 0:
                     duplicate += 1
                 elif vnay == 2:
                     errors += 1
+
         except Exception as e:
             logger.exception(e)
             k = await msg.edit(f'Error: {e}')
-            await k.reply_text(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
+            await k.reply_text(
+                f'Succesfully saved <code>{total_files}</code> to dataBase!\n'
+                f'Duplicate Files Skipped: <code>{duplicate}</code>\n'
+                f'Deleted Messages Skipped: <code>{deleted}</code>\n'
+                f'Non-Media messages skipped: <code>{no_media + unsupported}</code>'
+                f'(Unsupported Media - `{unsupported}` )\n'
+                f'Errors Occurred: <code>{errors}</code>'
+            )
             await k.reply_text("**If You Get Message Not Modified Error Then Skip Your Saved File Then Index Again**")
         else:
-            await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
-
+            await msg.edit(
+                f'Succesfully saved <code>{total_files}</code> to dataBase!\n'
+                f'Duplicate Files Skipped: <code>{duplicate}</code>\n'
+                f'Deleted Messages Skipped: <code>{deleted}</code>\n'
+                f'Non-Media messages skipped: <code>{no_media + unsupported}</code>'
+                f'(Unsupported Media - `{unsupported}` )\n'
+                f'Errors Occurred: <code>{errors}</code>'
+            )
