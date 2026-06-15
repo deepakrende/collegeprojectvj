@@ -1320,6 +1320,113 @@
         .d5  { animation-delay: 0.45s; }
         .d6  { animation-delay: 0.55s; }
 
+        .pause-promo{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.92);
+    backdrop-filter:blur(10px);
+    z-index:99999;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+}
+
+.pause-card{
+    width:100%;
+    max-width:450px;
+
+    background:linear-gradient(
+        135deg,
+        #0f1020,
+        #17172d
+    );
+
+    border:1px solid rgba(245,197,24,.25);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    text-align:center;
+
+    box-shadow:
+    0 0 50px rgba(245,197,24,.15);
+}
+
+.pause-badge{
+    display:inline-block;
+
+    padding:6px 14px;
+
+    border-radius:999px;
+
+    background:linear-gradient(
+        135deg,
+        #f5c518,
+        #ff9800
+    );
+
+    color:#000;
+
+    font-weight:800;
+
+    font-size:.75rem;
+
+    margin-bottom:15px;
+}
+
+.pause-card h2{
+    color:#fff;
+    margin-bottom:15px;
+}
+
+.pause-card p{
+    color:#d7d7e7;
+    line-height:1.8;
+    margin-bottom:25px;
+}
+
+.pause-btn{
+    display:block;
+    width:100%;
+
+    padding:14px;
+
+    border-radius:14px;
+
+    text-decoration:none;
+
+    background:linear-gradient(
+        135deg,
+        #f5c518,
+        #ff9800
+    );
+
+    color:#000;
+
+    font-weight:800;
+
+    margin-bottom:12px;
+}
+
+.pause-close{
+    width:100%;
+    padding:12px;
+
+    border:none;
+
+    border-radius:14px;
+
+    cursor:pointer;
+
+    background:#23233d;
+
+    color:#fff;
+}
+
 
     </style>
 </head>
@@ -1700,6 +1807,37 @@
     </div>
 </div>
 
+    <div id="pausePromo" class="pause-promo">
+
+    <div class="pause-card">
+
+        <div class="pause-badge">
+            🔥 EXCLUSIVE DEALS
+        </div>
+
+        <h2>Premium OTT & AI Tools</h2>
+
+        <p>
+            🎬 Amazon Prime - ₹799<br>
+            🤖 Gemini Pro + 5TB - ₹1499<br>
+            📚 Datacamp Premium - ₹1599<br>
+            ▶️ YouTube Premium Available
+        </p>
+
+        <a href="https://t.me/MMNOTTMARTZ"
+           target="_blank"
+           class="pause-btn">
+            🚀 View All Deals
+        </a>
+
+        <button id="closePromo" class="pause-close">
+            Continue Watching
+        </button>
+
+    </div>
+
+</div>
+
 <!-- ─── SCRIPTS ─── -->
 <script>
 (function() {
@@ -1742,6 +1880,8 @@
     const ripRewR  = $('vpSeekR');
     const togLoop  = $('vpToggleLoop');
     const togMirror= $('vpToggleMirror');
+    const pausePromo = document.getElementById('pausePromo');
+    const closePromo = document.getElementById('closePromo');
 
     /* ── title truncate ── */
     const fn = $('myDiv');
@@ -1782,8 +1922,19 @@
         triggerRipple();
     }
     playBtn.addEventListener('click', togglePlay);
-    vid.addEventListener('play',  syncPlayIcon);
-    vid.addEventListener('pause', syncPlayIcon);
+    vid.addEventListener('play', function(){
+    syncPlayIcon();
+    pausePromo.style.display = 'none';
+});
+
+vid.addEventListener('pause', function(){
+
+    syncPlayIcon();
+
+    if(vid.ended) return;
+
+    pausePromo.style.display = 'flex';
+});
 
     /* click on video to toggle — double click = seek */
     let clickTimer;
@@ -1967,6 +2118,13 @@
     window.km_player     = () => window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end';
     window.hd_player     = () => window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end';
     window.Download      = () => window.location.href = Link;
+
+    closePromo.addEventListener('click', function(){
+
+    pausePromo.style.display = 'none';
+
+    vid.play();
+});
 
     /* ── right-click guard ── */
     document.addEventListener('contextmenu', e => e.preventDefault());
