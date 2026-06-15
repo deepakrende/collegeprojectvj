@@ -126,159 +126,385 @@
             padding: 0 14px;
         }
 
-        /* ─── OTT BANNER ─── */
+        /* ─── OTT BANNER — PREMIUM REDESIGN ─── */
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent2); }
+            50% { opacity: 0.3; box-shadow: none; }
+        }
+        @keyframes shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        @keyframes floatParticle {
+            0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.6; }
+            33%  { transform: translateY(-14px) translateX(6px) scale(1.1); opacity: 1; }
+            66%  { transform: translateY(-8px) translateX(-4px) scale(0.9); opacity: 0.7; }
+            100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.6; }
+        }
+        @keyframes rotateStar {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50%       { opacity: 1;   transform: scale(1.08); }
+        }
+        @keyframes scanLine {
+            0%   { top: -4px; }
+            100% { top: 100%; }
+        }
+
         .ott-banner {
-            margin: 18px 14px 0;
+            margin: 20px 14px 0;
             max-width: 872px;
             margin-left: auto;
             margin-right: auto;
-            border-radius: 18px;
+            border-radius: 22px;
             overflow: hidden;
-            background: linear-gradient(130deg, #0b0b1f 0%, #111125 50%, #0a1818 100%);
-            border: 1px solid rgba(245,197,24,0.22);
+            background:
+                linear-gradient(145deg,
+                    #0c0c22 0%,
+                    #101028 30%,
+                    #0d1a1a 65%,
+                    #0b0b1e 100%);
+            border: 1px solid rgba(245,197,24,0.28);
             box-shadow:
-                0 0 0 1px rgba(0,0,0,0.6),
-                0 24px 60px rgba(0,0,0,0.55),
-                inset 0 1px 0 rgba(255,255,255,0.04);
+                0 0 0 1px rgba(0,0,0,0.7),
+                0 0 40px rgba(245,197,24,0.08),
+                0 0 80px rgba(124,111,255,0.06),
+                0 28px 70px rgba(0,0,0,0.65),
+                inset 0 1px 0 rgba(255,255,255,0.06);
             position: relative;
         }
 
+        /* Scan-line animation */
+        .ott-banner::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(245,197,24,0.25), rgba(0,224,176,0.2), transparent);
+            pointer-events: none;
+            animation: scanLine 4s linear infinite;
+            z-index: 3;
+        }
+
+        /* Ambient background glow */
         .ott-banner::before {
             content: '';
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 65% 65% at 5% 50%, rgba(245,197,24,0.07) 0%, transparent 55%),
-                radial-gradient(ellipse 55% 70% at 95% 50%, rgba(0,224,176,0.05) 0%, transparent 55%);
+                radial-gradient(ellipse 70% 80% at 0% 50%,  rgba(245,197,24,0.09) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 70% at 100% 50%, rgba(0,224,176,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 50% at 50% 100%, rgba(124,111,255,0.06) 0%, transparent 60%);
             pointer-events: none;
+            z-index: 0;
         }
 
+        /* Top accent bar — thick, multi-color */
         .ott-glow-line {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(245,197,24,0.6), rgba(0,224,176,0.4), transparent);
+            height: 3px;
+            position: relative;
+            background: linear-gradient(90deg,
+                #f5c518 0%,
+                #ffae00 18%,
+                #7c6fff 42%,
+                #00e0b0 65%,
+                #f5c518 100%);
+            background-size: 200% auto;
+            animation: shimmer 4s linear infinite;
         }
 
         .ott-body {
-            padding: 18px 20px 16px;
+            padding: 22px 24px 18px;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 14px;
+            gap: 18px;
+            position: relative;
+            z-index: 2;
         }
 
         .ott-left { flex: 1; min-width: 0; }
 
+        /* Floating particles (decorative spans) */
+        .ott-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .ott-particle-1 {
+            width: 80px; height: 80px;
+            top: -20px; right: 140px;
+            background: radial-gradient(circle, rgba(245,197,24,0.15) 0%, transparent 70%);
+            animation: floatParticle 5s ease-in-out infinite;
+        }
+        .ott-particle-2 {
+            width: 50px; height: 50px;
+            bottom: 10px; right: 60px;
+            background: radial-gradient(circle, rgba(0,224,176,0.12) 0%, transparent 70%);
+            animation: floatParticle 7s ease-in-out infinite reverse;
+        }
+        .ott-particle-3 {
+            width: 40px; height: 40px;
+            top: 20px; left: 260px;
+            background: radial-gradient(circle, rgba(124,111,255,0.12) 0%, transparent 70%);
+            animation: floatParticle 6s ease-in-out infinite 1s;
+        }
+
+        /* Badge row */
         .ott-badge-row {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
         }
 
+        /* Hot badge — premium gold pill */
         .ott-hot {
             font-family: var(--font-h);
             font-weight: 800;
-            font-size: 0.65rem;
-            letter-spacing: 1.8px;
+            font-size: 0.62rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
             color: #000;
-            background: linear-gradient(135deg, #f5c518, #e8a800);
-            padding: 4px 11px;
+            background: linear-gradient(135deg, #ffe44d, #f5c518, #e8a800);
+            background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
+            padding: 5px 13px;
             border-radius: 50px;
-            box-shadow: 0 3px 12px rgba(245,197,24,0.4);
+            box-shadow:
+                0 0 0 1px rgba(245,197,24,0.5),
+                0 4px 16px rgba(245,197,24,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.3);
             white-space: nowrap;
+            position: relative;
         }
 
+        /* Star spark on badge */
+        .ott-hot::before {
+            content: '✦';
+            margin-right: 5px;
+            font-size: 0.55rem;
+            animation: rotateStar 2s linear infinite;
+            display: inline-block;
+        }
+
+        /* Live dot */
         .live-dot {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.69rem;
+            color: var(--accent2);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .live-dot::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent2);
+            box-shadow: 0 0 0 2px rgba(0,224,176,0.25), 0 0 10px var(--accent2);
+            animation: blink 1.6s ease infinite;
+            flex-shrink: 0;
+        }
+
+        /* Headline — bold cinematic */
+        .ott-headline {
+            font-family: var(--font-h);
+            font-size: clamp(0.95rem, 2.5vw, 1.18rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 14px;
+            line-height: 1.28;
+        }
+        .ott-headline .hl-main {
+            display: block;
+            background: linear-gradient(100deg, #ffffff 0%, #e4e4f0 60%, #b3a8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .ott-headline .hl-sub {
+            display: block;
+            font-size: 0.78em;
+            font-weight: 600;
+            background: linear-gradient(90deg, #f5c518, #00e0b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-top: 2px;
+        }
+
+        /* Services grid */
+        .ott-services {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .svc-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 10px;
+            font-size: 0.73rem;
+            font-weight: 600;
+            border: 1px solid;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .svc-chip:hover {
+            transform: translateY(-2px);
+        }
+        .svc-chip .svc-icon {
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .c-red  { color: #ff9f9f; border-color: rgba(255,92,92,0.4);  background: rgba(255,92,92,0.1); }
+        .c-red:hover  { box-shadow: 0 6px 18px rgba(255,92,92,0.2); }
+        .c-pur  { color: #c4bcff; border-color: rgba(124,111,255,0.4); background: rgba(124,111,255,0.12); }
+        .c-pur:hover  { box-shadow: 0 6px 18px rgba(124,111,255,0.2); }
+        .c-teal { color: #5de8cc; border-color: rgba(0,224,176,0.35); background: rgba(0,224,176,0.1); }
+        .c-teal:hover { box-shadow: 0 6px 18px rgba(0,224,176,0.18); }
+        .c-gold { color: #f5c518; border-color: rgba(245,197,24,0.35); background: rgba(245,197,24,0.09); }
+        .c-gold:hover { box-shadow: 0 6px 18px rgba(245,197,24,0.2); }
+        .c-blue { color: #7eceff; border-color: rgba(34,158,217,0.4); background: rgba(34,158,217,0.1); }
+        .c-blue:hover { box-shadow: 0 6px 18px rgba(34,158,217,0.2); }
+
+        /* Trust row */
+        .ott-trust {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        .trust-item {
             display: flex;
             align-items: center;
             gap: 5px;
             font-size: 0.7rem;
-            color: var(--accent2);
-            font-weight: 600;
+            color: var(--muted2);
         }
+        .trust-item svg { flex-shrink: 0; }
 
-        .live-dot::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent2);
-            box-shadow: 0 0 8px var(--accent2);
-            animation: blink 1.8s ease infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .ott-headline {
-            font-family: var(--font-h);
-            font-size: clamp(0.88rem, 2.2vw, 1.05rem);
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.3px;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-
-        .ott-chips {
+        /* CTA column */
+        .ott-cta-wrap {
+            flex-shrink: 0;
             display: flex;
-            flex-wrap: wrap;
-            gap: 7px;
-        }
-
-        .chip {
-            display: inline-flex;
+            flex-direction: column;
             align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 0.74rem;
-            font-weight: 500;
-            border: 1px solid;
+            gap: 10px;
         }
 
-        .c-red  { color: #ff8f8f; border-color: rgba(255,92,92,0.35);  background: rgba(255,92,92,0.1); }
-        .c-pur  { color: #b3a8ff; border-color: rgba(124,111,255,0.35); background: rgba(124,111,255,0.1); }
-        .c-teal { color: #5de8cc; border-color: rgba(0,224,176,0.3);   background: rgba(0,224,176,0.09); }
-        .c-gold { color: #f5c518; border-color: rgba(245,197,24,0.3);  background: rgba(245,197,24,0.08); }
-
-        .ott-cta-wrap { flex-shrink: 0; }
-
+        /* Primary CTA */
         .ott-cta {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 22px;
-            border-radius: 50px;
+            gap: 9px;
+            padding: 14px 26px;
+            border-radius: 14px;
             font-family: var(--font-h);
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #fff;
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: #000;
             text-decoration: none;
-            background: linear-gradient(135deg, #7c6fff, #5c53d0);
-            box-shadow: 0 5px 20px rgba(124,111,255,0.45);
+            background: linear-gradient(135deg, #ffe44d, #f5c518, #e8a800);
+            background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
+            box-shadow:
+                0 0 0 1px rgba(245,197,24,0.4),
+                0 6px 24px rgba(245,197,24,0.5),
+                0 2px 8px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.35);
             transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
             white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            min-width: 160px;
+            justify-content: center;
+        }
+        .ott-cta::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transition: left 0.5s ease;
         }
         .ott-cta:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 12px 32px rgba(124,111,255,0.6);
-            color: #fff;
+            transform: translateY(-4px) scale(1.04);
+            box-shadow:
+                0 0 0 1px rgba(245,197,24,0.6),
+                0 14px 36px rgba(245,197,24,0.65),
+                inset 0 1px 0 rgba(255,255,255,0.4);
+            color: #000;
             text-decoration: none;
         }
+        .ott-cta:hover::before { left: 150%; }
+        .ott-cta-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.3px; }
+        .ott-cta-sub   { font-size: 0.6rem; font-weight: 500; opacity: 0.7; }
+        .ott-cta-text  { display: flex; flex-direction: column; align-items: flex-start; }
 
+        /* Urgency badge under CTA */
+        .ott-urgency {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #ff9f5a;
+            letter-spacing: 0.4px;
+        }
+        .ott-urgency::before {
+            content: '';
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: #ff6b35;
+            box-shadow: 0 0 8px #ff6b35;
+            animation: blink 1s ease infinite;
+        }
+
+        /* Bottom note bar */
         .ott-note {
-            padding: 9px 20px 12px;
-            font-size: 0.72rem;
+            padding: 10px 24px 13px;
+            font-size: 0.7rem;
             color: var(--muted2);
             display: flex;
             align-items: center;
-            gap: 7px;
-            border-top: 1px solid var(--border);
+            gap: 8px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+        .ott-note-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 10px 0 0;
+        }
+        .ott-note-item + .ott-note-item {
+            border-left: 1px solid rgba(255,255,255,0.08);
+            padding-left: 10px;
+        }
+
+        /* OTT mobile */
+        @media (max-width: 520px) {
+            .ott-body { flex-direction: column; gap: 14px; }
+            .ott-cta-wrap { width: 100%; }
+            .ott-cta { width: 100%; }
+            .ott-particle-3 { display: none; }
         }
 
         /* ─── FILE TITLE ─── */
@@ -287,7 +513,6 @@
             max-width: 900px;
             margin: 0 auto;
         }
-
         .file-label {
             font-size: 0.67rem;
             font-weight: 700;
@@ -299,16 +524,13 @@
             align-items: center;
             gap: 8px;
         }
-
         .file-label::before {
             content: '';
             display: inline-block;
-            width: 3px;
-            height: 12px;
+            width: 3px; height: 12px;
             border-radius: 2px;
             background: var(--accent);
         }
-
         .file-name {
             font-family: var(--font-h);
             font-size: clamp(0.92rem, 2.2vw, 1.15rem);
@@ -317,28 +539,496 @@
             letter-spacing: -0.4px;
         }
 
-        /* ─── PLAYER ─── */
-        .player-area {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 14px;
-        }
+        /* ─── PLAYER WRAPPER ─── */
+        .player-area { max-width: 900px; margin: 0 auto; padding: 0 14px; }
 
-        .player-shell {
-            border-radius: 18px;
+        /* ── CINEMATIC PLAYER SHELL ── */
+        .vp-shell {
+            position: relative;
+            border-radius: 20px;
             overflow: hidden;
-            border: 1px solid rgba(124,111,255,0.18);
+            background: #000;
+            border: 1px solid rgba(124,111,255,0.22);
             box-shadow:
-                0 0 0 1px rgba(0,0,0,0.7),
-                0 32px 80px rgba(0,0,0,0.75),
-                0 0 80px rgba(124,111,255,0.07);
+                0 0 0 1px rgba(0,0,0,0.8),
+                0 40px 90px rgba(0,0,0,0.8),
+                0 0 60px rgba(124,111,255,0.08);
+            aspect-ratio: 16/9;
+            cursor: none;
+        }
+        .vp-shell.show-cursor { cursor: default; }
+
+        .vp-video {
+            width: 100%; height: 100%;
+            display: block;
+            object-fit: contain;
             background: #000;
         }
 
-        .player-shell video { width: 100%; display: block; }
+        /* Ambient glow rim */
+        .vp-shell::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: 21px;
+            background: linear-gradient(135deg, rgba(124,111,255,0.15), transparent 40%, rgba(0,224,176,0.08));
+            pointer-events: none;
+            z-index: 5;
+        }
 
-        /* Plyr accent */
-        :root { --plyr-color-main: #7c6fff; }
+        /* ── CENTRE PLAY OVERLAY ── */
+        .vp-center-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .vp-play-ripple {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: rgba(124,111,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.6);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(124,111,255,0.4);
+        }
+        .vp-play-ripple.pop {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.0s, transform 0.12s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .vp-play-ripple.fade {
+            opacity: 0;
+            transform: scale(1.3);
+            transition: opacity 0.35s ease 0.2s, transform 0.35s ease 0.2s;
+        }
+        .vp-play-ripple svg { filter: drop-shadow(0 0 8px rgba(124,111,255,0.8)); }
+
+        /* ── SEEK FLASH ── */
+        .vp-seek-flash {
+            position: absolute;
+            top: 50%; transform: translateY(-50%);
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.12);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 11;
+            transition: opacity 0.25s ease;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .vp-seek-flash.left  { left: 14%; }
+        .vp-seek-flash.right { right: 14%; }
+        .vp-seek-flash.show  { opacity: 1; }
+        .vp-seek-flash svg   { flex-shrink: 0; }
+
+        /* ── BUFFERING SPINNER ── */
+        @keyframes vpSpin { to { transform: rotate(360deg); } }
+        .vp-spinner {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9;
+            pointer-events: none;
+        }
+        .vp-spinner.show { display: flex; }
+        .vp-spinner-ring {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            animation: vpSpin 0.8s linear infinite;
+        }
+
+        /* ── GRADIENT SCRIM for controls ── */
+        .vp-scrim {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 180px;
+            background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.6) 50%, transparent 100%);
+            pointer-events: none;
+            z-index: 6;
+            transition: opacity 0.35s ease;
+        }
+        .vp-shell.controls-hidden .vp-scrim { opacity: 0; }
+
+        /* ── TOP INFO BAR ── */
+        .vp-top-bar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 14px 16px 50px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 8;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .vp-shell.controls-hidden .vp-top-bar {
+            opacity: 0; transform: translateY(-8px); pointer-events: none;
+        }
+        .vp-top-title {
+            font-family: var(--font-h);
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            opacity: 0.9;
+            letter-spacing: -0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+            text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+        }
+        .vp-quality-badge {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #000;
+            background: var(--accent);
+            padding: 3px 9px;
+            border-radius: 6px;
+            box-shadow: 0 0 12px rgba(124,111,255,0.6);
+        }
+
+        /* ── CONTROLS BAR ── */
+        .vp-controls {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 0 14px 14px;
+            z-index: 8;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .vp-shell.controls-hidden .vp-controls {
+            opacity: 0; transform: translateY(8px); pointer-events: none;
+        }
+
+        /* PROGRESS BAR */
+        .vp-progress-wrap {
+            position: relative;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .vp-progress-track {
+            position: absolute;
+            left: 0; right: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.14);
+            border-radius: 4px;
+            overflow: visible;
+            transition: height 0.15s ease;
+        }
+        .vp-progress-wrap:hover .vp-progress-track { height: 6px; }
+        .vp-progress-buf {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            background: rgba(255,255,255,0.18);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .vp-progress-fill {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            background: linear-gradient(90deg, var(--accent), #a89aff);
+            border-radius: 4px;
+            width: 0%;
+        }
+        .vp-progress-thumb {
+            position: absolute;
+            top: 50%; transform: translateY(-50%) scale(0);
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(124,111,255,0.5), 0 2px 8px rgba(0,0,0,0.5);
+            transition: transform 0.15s ease, left 0s;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .vp-progress-wrap:hover .vp-progress-thumb { transform: translateY(-50%) scale(1); }
+
+        /* Time tooltip */
+        .vp-time-tooltip {
+            position: absolute;
+            bottom: 26px;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            pointer-events: none;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            transform: translateX(-50%);
+            border: 1px solid rgba(124,111,255,0.3);
+        }
+        .vp-progress-wrap:hover .vp-time-tooltip { opacity: 1; }
+
+        /* BOTTOM ROW */
+        .vp-btm {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .vp-btm-left  { display: flex; align-items: center; gap: 4px; flex: 1; }
+        .vp-btm-right { display: flex; align-items: center; gap: 4px; }
+
+        /* Icon buttons */
+        .vp-btn {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .vp-btn:hover { background: rgba(255,255,255,0.12); transform: scale(1.08); }
+        .vp-btn:active { transform: scale(0.92); }
+        .vp-btn svg { pointer-events: none; }
+
+        /* Play btn larger */
+        .vp-btn-play {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: rgba(124,111,255,0.25);
+            border: 1px solid rgba(124,111,255,0.4);
+        }
+        .vp-btn-play:hover {
+            background: rgba(124,111,255,0.45);
+            box-shadow: 0 0 16px rgba(124,111,255,0.4);
+        }
+
+        /* Time display */
+        .vp-time {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+            padding: 0 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .vp-time-sep { opacity: 0.4; }
+
+        /* Volume group */
+        .vp-vol-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .vp-vol-slider {
+            width: 0;
+            overflow: hidden;
+            transition: width 0.25s ease;
+            display: flex;
+            align-items: center;
+        }
+        .vp-vol-group:hover .vp-vol-slider { width: 60px; }
+        .vp-vol-input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 60px; height: 4px;
+            border-radius: 4px;
+            outline: none;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent) var(--vol, 100%), rgba(255,255,255,0.2) var(--vol, 100%));
+            cursor: pointer;
+        }
+        .vp-vol-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 4px rgba(124,111,255,0.6);
+        }
+
+        /* Speed pill */
+        .vp-speed-pill {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: rgba(255,255,255,0.75);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 7px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .vp-speed-pill:hover { background: rgba(124,111,255,0.3); border-color: rgba(124,111,255,0.5); color: #fff; }
+
+        /* Speed panel popup */
+        .vp-speed-panel {
+            position: absolute;
+            bottom: 54px; right: 14px;
+            background: rgba(14,14,30,0.96);
+            border: 1px solid rgba(124,111,255,0.3);
+            border-radius: 14px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 20;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7), 0 0 20px rgba(124,111,255,0.1);
+            min-width: 110px;
+        }
+        .vp-speed-panel.open { display: flex; }
+        .vp-speed-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 4px 10px 6px;
+        }
+        .vp-speed-opt {
+            padding: 7px 12px;
+            border-radius: 9px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all 0.12s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .vp-speed-opt:hover { background: rgba(124,111,255,0.2); color: #fff; }
+        .vp-speed-opt.active { background: rgba(124,111,255,0.3); color: var(--accent); font-weight: 800; }
+        .vp-speed-opt .sp-check { opacity: 0; font-size: 0.7rem; color: var(--accent); }
+        .vp-speed-opt.active .sp-check { opacity: 1; }
+
+        /* Settings panel */
+        .vp-settings-panel {
+            position: absolute;
+            bottom: 54px; right: 14px;
+            background: rgba(14,14,30,0.96);
+            border: 1px solid rgba(124,111,255,0.3);
+            border-radius: 14px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 20;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            min-width: 180px;
+        }
+        .vp-settings-panel.open { display: flex; }
+        .vp-set-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 8px;
+            border-radius: 9px;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+        .vp-set-row:hover { background: rgba(255,255,255,0.06); }
+        .vp-set-row-label {
+            font-size: 0.73rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            display: flex; align-items: center; gap: 7px;
+        }
+        .vp-set-row-label svg { opacity: 0.6; }
+        .vp-toggle {
+            width: 32px; height: 18px;
+            border-radius: 9px;
+            background: rgba(255,255,255,0.12);
+            position: relative;
+            transition: background 0.2s ease;
+            flex-shrink: 0;
+        }
+        .vp-toggle.on { background: var(--accent); }
+        .vp-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            transition: left 0.2s ease;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+        .vp-toggle.on::after { left: 16px; }
+
+        /* Keyboard shortcut toast */
+        @keyframes vpToastIn  { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+        @keyframes vpToastOut { from { opacity:1; } to { opacity:0; } }
+        .vp-toast {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            z-index: 15;
+            pointer-events: none;
+            display: none;
+            border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            white-space: nowrap;
+        }
+        .vp-toast.show { display: block; animation: vpToastIn 0.2s ease; }
+        .vp-toast.hide { animation: vpToastOut 0.3s ease forwards; }
+
+        /* Pip mode */
+        .vp-shell.pip-mode {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            width: 300px; height: auto;
+            aspect-ratio: 16/9;
+            z-index: 9999;
+            border-radius: 14px;
+            cursor: default;
+        }
+
+        /* Fullscreen */
+        .vp-shell:-webkit-full-screen,
+        .vp-shell:fullscreen {
+            border-radius: 0;
+            border: none;
+        }
 
         /* ─── EXTERNAL PLAYERS ─── */
         .ext-section {
@@ -630,12 +1320,7 @@
         .d5  { animation-delay: 0.45s; }
         .d6  { animation-delay: 0.55s; }
 
-        /* OTT mobile tweak */
-        @media (max-width: 520px) {
-            .ott-body { flex-direction: column; }
-            .ott-cta-wrap { width: 100%; }
-            .ott-cta { width: 100%; justify-content: center; }
-        }
+
     </style>
 </head>
 
@@ -654,46 +1339,105 @@
     </div>
 </nav>
 
-<!-- ─── OTT PROMO BANNER ─── -->
-<div style="max-width:900px;margin:18px auto 0;padding:0 14px;" class="au d2">
+<!-- ─── OTT PROMO BANNER — PREMIUM ─── -->
+<div style="max-width:900px;margin:20px auto 0;padding:0 14px;" class="au d2">
     <div class="ott-banner">
+
+        <!-- Floating ambient particles -->
+        <span class="ott-particle ott-particle-1"></span>
+        <span class="ott-particle ott-particle-2"></span>
+        <span class="ott-particle ott-particle-3"></span>
+
+        <!-- Animated top bar -->
         <div class="ott-glow-line"></div>
+
         <div class="ott-body">
             <div class="ott-left">
+
+                <!-- Badge row -->
                 <div class="ott-badge-row">
-                    <span class="ott-hot">🔥 Best Prices</span>
+                    <span class="ott-hot">Best Prices</span>
                     <span class="live-dot">Available Now</span>
                 </div>
-                <div class="ott-headline">OTT Subscriptions, AI Tools, Softwares &amp; VPNs<br>— All at Unbeatable Prices</div>
-                <div class="ott-chips">
-                    <span class="chip c-red">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/></svg>
-                        OTT Subscriptions
+
+                <!-- Headline -->
+                <div class="ott-headline">
+                    <span class="hl-main">OTT · AI Tools · Softwares · VPNs</span>
+                    <span class="hl-sub">All at Unbeatable Prices — Instant Delivery</span>
+                </div>
+
+                <!-- Service chips -->
+                <div class="ott-services">
+                    <span class="svc-chip c-red">
+                        <span class="svc-icon">▶</span> OTT Subscriptions
                     </span>
-                    <span class="chip c-pur">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"/></svg>
-                        AI Tools
+                    <span class="svc-chip c-pur">
+                        <span class="svc-icon">⚙</span> AI Tools
                     </span>
-                    <span class="chip c-teal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>
-                        Softwares
+                    <span class="svc-chip c-teal">
+                        <span class="svc-icon">📦</span> Softwares
                     </span>
-                    <span class="chip c-gold">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/><path d="M8 4a.5.5 0 0 1 .5.5v3.793l2.146 2.147a.5.5 0 0 1-.708.707L7.5 8.707V4.5A.5.5 0 0 1 8 4z"/></svg>
-                        VPNs
+                    <span class="svc-chip c-gold">
+                        <span class="svc-icon">🔒</span> VPNs
+                    </span>
+                    <span class="svc-chip c-blue">
+                        <span class="svc-icon">⚡</span> Combo Plans
                     </span>
                 </div>
+
+                <!-- Trust signals -->
+                <div class="ott-trust">
+                    <span class="trust-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#00e0b0" viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                        Trusted Seller
+                    </span>
+                    <span class="trust-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#f5c518" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>
+                        Top Rated
+                    </span>
+                    <span class="trust-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#b3a8ff" viewBox="0 0 16 16"><path d="M8 1a5 5 0 0 0-5 5v1h10V6a5 5 0 0 0-5-5zm-3 6V6a3 3 0 0 1 6 0v1H5zm-1 1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H4z"/></svg>
+                        100% Secure
+                    </span>
+                    <span class="trust-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#ff9f9f" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
+                        Instant Delivery
+                    </span>
+                </div>
+
             </div>
+
+            <!-- CTA column -->
             <div class="ott-cta-wrap">
                 <a href="https://t.me/MMNOTTMARTZ" target="_blank" class="ott-cta">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
-                    Get Deals →
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
+                    <span class="ott-cta-text">
+                        <span class="ott-cta-label">Get Best Deals →</span>
+                        <span class="ott-cta-sub">Tap to explore</span>
+                    </span>
                 </a>
+                <div class="ott-urgency">Limited slots only!</div>
             </div>
         </div>
+
+        <!-- Bottom trust bar -->
         <div class="ott-note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
-            Cheap prices • Instant delivery • Trusted seller — Limited slots only!
+            <span class="ott-note-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#00e0b0" viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>
+                Lowest prices guaranteed
+            </span>
+            <span class="ott-note-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#f5c518" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
+                Instant activation
+            </span>
+            <span class="ott-note-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#b3a8ff" viewBox="0 0 16 16"><path d="M8 1a5 5 0 0 0-5 5v1h10V6a5 5 0 0 0-5-5zm-3 6V6a3 3 0 0 1 6 0v1H5zm-1 1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H4z"/></svg>
+                No hidden charges
+            </span>
+            <span class="ott-note-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="#ff9f9f" viewBox="0 0 16 16"><path d="M8 1c-1.573 0-5.5 1.5-5.5 7s3.927 7 5.5 7 5.5-1.5 5.5-7S9.573 1 8 1zm0 13C6.5 14 3.5 12.5 3.5 8S6.5 2 8 2s4.5 1.5 4.5 6-3 6-4.5 6z"/><path d="M8 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
+                24/7 Support
+            </span>
         </div>
     </div>
 </div>
@@ -706,12 +1450,146 @@
 
 <!-- ─── VIDEO PLAYER ─── -->
 <div class="player-area au d3">
-    <div class="player-shell">
-        <video id="player" class="player" playsinline controls>
-            <source src="{{file_url}}" type="video/mp4">
-        </video>
+<div class="vp-shell" id="vpShell">
+
+    <!-- Ambient glow (::before via CSS) -->
+
+    <!-- The video -->
+    <video id="vpVideo" class="vp-video" playsinline preload="metadata">
+        <source src="{{file_url}}" type="video/mp4">
+    </video>
+
+    <!-- Buffering spinner -->
+    <div class="vp-spinner" id="vpSpinner">
+        <div class="vp-spinner-ring"></div>
     </div>
-</div>
+
+    <!-- Centre play/pause ripple -->
+    <div class="vp-center-overlay">
+        <div class="vp-play-ripple" id="vpRipple">
+            <svg id="vpRippleIcon" width="28" height="28" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+    </div>
+
+    <!-- Seek flash left -->
+    <div class="vp-seek-flash left" id="vpSeekL">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+        <span>-10s</span>
+    </div>
+    <!-- Seek flash right -->
+    <div class="vp-seek-flash right" id="vpSeekR">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3"/></svg>
+        <span>+10s</span>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="vp-toast" id="vpToast"></div>
+
+    <!-- Top bar -->
+    <div class="vp-top-bar" id="vpTopBar">
+        <div class="vp-top-title" id="vpTopTitle">{{file_name}}</div>
+        <div class="vp-quality-badge">HD</div>
+    </div>
+
+    <!-- Gradient scrim -->
+    <div class="vp-scrim"></div>
+
+    <!-- Speed panel -->
+    <div class="vp-speed-panel" id="vpSpeedPanel">
+        <div class="vp-speed-label">Playback Speed</div>
+        <div class="vp-speed-opt" data-speed="0.25">0.25× <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt" data-speed="0.5">0.5× <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt" data-speed="0.75">0.75× <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt active" data-speed="1">Normal <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt" data-speed="1.25">1.25× <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt" data-speed="1.5">1.5× <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt" data-speed="1.75">1.75× <span class="sp-check">✓</span></div>
+        <div class="vp-speed-opt" data-speed="2">2× <span class="sp-check">✓</span></div>
+    </div>
+
+    <!-- Settings panel -->
+    <div class="vp-settings-panel" id="vpSettPanel">
+        <div class="vp-set-row" id="vpSetLoop">
+            <div class="vp-set-row-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                Loop
+            </div>
+            <div class="vp-toggle" id="vpToggleLoop"></div>
+        </div>
+        <div class="vp-set-row" id="vpSetMirror">
+            <div class="vp-set-row-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+                Mirror
+            </div>
+            <div class="vp-toggle" id="vpToggleMirror"></div>
+        </div>
+        <div class="vp-set-row" id="vpSetPip">
+            <div class="vp-set-row-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><rect x="12" y="11" width="8" height="5" rx="1"/></svg>
+                Picture-in-Picture
+            </div>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.4"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+    </div>
+
+    <!-- Controls bar -->
+    <div class="vp-controls" id="vpControls">
+
+        <!-- Progress row -->
+        <div class="vp-progress-wrap" id="vpProgressWrap">
+            <div class="vp-progress-track">
+                <div class="vp-progress-buf"  id="vpBuf"></div>
+                <div class="vp-progress-fill" id="vpFill"></div>
+            </div>
+            <div class="vp-progress-thumb" id="vpThumb"></div>
+            <div class="vp-time-tooltip"   id="vpTooltip">0:00</div>
+        </div>
+
+        <!-- Bottom row -->
+        <div class="vp-btm">
+            <div class="vp-btm-left">
+                <!-- Rewind 10s -->
+                <button class="vp-btn" id="vpBtnRew" title="Rewind 10s (←)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+                </button>
+                <!-- Play/Pause -->
+                <button class="vp-btn vp-btn-play" id="vpBtnPlay" title="Play/Pause (Space)">
+                    <svg id="vpPlayIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <!-- Forward 10s -->
+                <button class="vp-btn" id="vpBtnFwd" title="Forward 10s (→)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-3"/></svg>
+                </button>
+                <!-- Volume -->
+                <div class="vp-vol-group">
+                    <button class="vp-btn" id="vpBtnMute" title="Mute (M)">
+                        <svg id="vpVolIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                    </button>
+                    <div class="vp-vol-slider">
+                        <input class="vp-vol-input" id="vpVolSlider" type="range" min="0" max="1" step="0.01" value="1">
+                    </div>
+                </div>
+                <!-- Time -->
+                <span class="vp-time"><span id="vpCurTime">0:00</span><span class="vp-time-sep"> / </span><span id="vpDurTime">0:00</span></span>
+            </div>
+
+            <div class="vp-btm-right">
+                <!-- Speed -->
+                <div class="vp-speed-pill" id="vpSpeedToggle" title="Playback Speed">1×</div>
+                <!-- Settings -->
+                <button class="vp-btn" id="vpBtnSett" title="Settings">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <!-- Fullscreen -->
+                <button class="vp-btn" id="vpBtnFs" title="Fullscreen (F)">
+                    <svg id="vpFsIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /vp-shell -->
+</div><!-- /player-area -->
 
 <!-- ─── EXTERNAL PLAYERS ─── -->
 <div class="ext-section au d4">
@@ -823,43 +1701,276 @@
 </div>
 
 <!-- ─── SCRIPTS ─── -->
-<script src="https://cdn.plyr.io/3.6.9/plyr.js"></script>
 <script>
-    // Title truncate
-    var div = document.getElementById('myDiv');
-    if (div) {
-        var t = div.textContent || div.innerText;
-        if (t.length > 72) { div.textContent = t.slice(0, 72) + '…'; }
+(function() {
+    /* ── helpers ── */
+    const $ = id => document.getElementById(id);
+    function fmt(s) {
+        s = Math.max(0, Math.floor(s || 0));
+        const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+        return h ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${m}:${String(sec).padStart(2,'0')}`;
     }
 
-    // Plyr
-    var controls = ['play-large','rewind','play','fast-forward','progress','current-time','duration','mute','volume','captions','settings','pip','airplay','download','fullscreen'];
-    document.addEventListener('DOMContentLoaded', function() {
-        Plyr.setup('.player', { controls: controls });
+    /* ── element refs ── */
+    const shell    = $('vpShell');
+    const vid      = $('vpVideo');
+    const spinner  = $('vpSpinner');
+    const ripple   = $('vpRipple');
+    const ripIcon  = $('vpRippleIcon');
+    const seekL    = $('vpSeekL');
+    const seekR    = $('vpSeekR');
+    const toast    = $('vpToast');
+    const topTitle = $('vpTopTitle');
+    const fill     = $('vpFill');
+    const buf      = $('vpBuf');
+    const thumb    = $('vpThumb');
+    const tooltip  = $('vpTooltip');
+    const pwrap    = $('vpProgressWrap');
+    const curT     = $('vpCurTime');
+    const durT     = $('vpDurTime');
+    const playBtn  = $('vpBtnPlay');
+    const playIcon = $('vpPlayIcon');
+    const volSlider= $('vpVolSlider');
+    const volIcon  = $('vpVolIcon');
+    const speedPill= $('vpSpeedToggle');
+    const speedPanel=$('vpSpeedPanel');
+    const settPanel=$('vpSettPanel');
+    const settBtn  = $('vpBtnSett');
+    const fsBtn    = $('vpBtnFs');
+    const fsIcon   = $('vpFsIcon');
+    const ripRewL  = $('vpSeekL');
+    const ripRewR  = $('vpSeekR');
+    const togLoop  = $('vpToggleLoop');
+    const togMirror= $('vpToggleMirror');
+
+    /* ── title truncate ── */
+    const fn = $('myDiv');
+    if (fn) { const t = fn.textContent; if (t.length > 72) fn.textContent = t.slice(0,72) + '…'; }
+    if (topTitle) { const t = topTitle.textContent; if (t.length > 60) topTitle.textContent = t.slice(0,60) + '…'; }
+
+    /* ── controls hide/show ── */
+    let hideTimer;
+    function showControls() {
+        shell.classList.remove('controls-hidden');
+        shell.classList.add('show-cursor');
+        clearTimeout(hideTimer);
+        if (!vid.paused) hideTimer = setTimeout(() => {
+            shell.classList.add('controls-hidden');
+            shell.classList.remove('show-cursor');
+        }, 3000);
+    }
+    shell.addEventListener('mousemove', showControls);
+    shell.addEventListener('touchstart', showControls, { passive: true });
+    showControls();
+
+    /* ── play / pause ── */
+    const PLAY_PATH  = '<polygon points="5,3 19,12 5,21"/>';
+    const PAUSE_PATH = '<rect x="6" y="3" width="4" height="18"/><rect x="14" y="3" width="4" height="18"/>';
+    function syncPlayIcon() {
+        playIcon.innerHTML = vid.paused ? PLAY_PATH : PAUSE_PATH;
+        ripIcon.innerHTML  = vid.paused ? PLAY_PATH : PAUSE_PATH;
+    }
+    function triggerRipple() {
+        ripple.classList.remove('pop','fade');
+        void ripple.offsetWidth;
+        ripple.classList.add('pop');
+        setTimeout(() => { ripple.classList.remove('pop'); ripple.classList.add('fade'); }, 120);
+        setTimeout(() => ripple.classList.remove('fade'), 600);
+    }
+    function togglePlay() {
+        if (vid.paused) vid.play(); else vid.pause();
+        triggerRipple();
+    }
+    playBtn.addEventListener('click', togglePlay);
+    vid.addEventListener('play',  syncPlayIcon);
+    vid.addEventListener('pause', syncPlayIcon);
+
+    /* click on video to toggle — double click = seek */
+    let clickTimer;
+    shell.addEventListener('click', function(e) {
+        if (e.target.closest('.vp-controls') || e.target.closest('.vp-speed-panel') || e.target.closest('.vp-settings-panel') || e.target.closest('.vp-top-bar')) return;
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(togglePlay, 220);
+    });
+    shell.addEventListener('dblclick', function(e) {
+        clearTimeout(clickTimer);
+        const rect = shell.getBoundingClientRect();
+        if (e.clientX < rect.left + rect.width / 2) seekBy(-10, true);
+        else seekBy(10, false);
     });
 
-    // External player links
-    var videolink = window.location.href;
-    var Link = videolink.replace('/watch/', '/');
+    /* ── seek 10s ── */
+    function flashSeek(el) {
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 700);
+    }
+    function seekBy(sec, isLeft) {
+        vid.currentTime = Math.max(0, Math.min(vid.duration || 0, vid.currentTime + sec));
+        flashSeek(isLeft ? seekL : seekR);
+    }
+    $('vpBtnRew').addEventListener('click', () => seekBy(-10, true));
+    $('vpBtnFwd').addEventListener('click', () => seekBy(10, false));
 
-    function vlc_player()    { window.location.href = 'vlc://' + Link; }
-    function mx_player()     { window.location.href = 'intent:' + Link + '#Intent;package=com.mxtech.videoplayer.ad;end'; }
-    function playit_player() { window.location.href = 'playit://playerv2/video?url=' + Link; }
-    function s_player()      { window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end'; }
-    function km_player()     { window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end'; }
-    function hd_player()     { window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end'; }
-    function Download()      { window.location.href = Link; }
-
-    // Disable right-click & devtools shortcuts
-    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12' ||
-            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-            (e.ctrlKey && e.key === 'u') ||
-            e.ctrlKey || e.shiftKey || e.altKey) {
-            e.preventDefault();
+    /* ── progress bar ── */
+    function pct(n) { return (isFinite(n) ? n : 0) + '%'; }
+    vid.addEventListener('timeupdate', function() {
+        if (!vid.duration) return;
+        const p = (vid.currentTime / vid.duration) * 100;
+        fill.style.width  = pct(p);
+        thumb.style.left  = pct(p);
+        curT.textContent  = fmt(vid.currentTime);
+    });
+    vid.addEventListener('durationchange', () => { durT.textContent = fmt(vid.duration); });
+    vid.addEventListener('progress', function() {
+        if (vid.buffered.length) {
+            const b = (vid.buffered.end(vid.buffered.length - 1) / vid.duration) * 100;
+            buf.style.width = pct(b);
         }
     });
+
+    /* seek on click/drag */
+    let seeking = false;
+    function seekFromEvent(e) {
+        const r = pwrap.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        vid.currentTime = x * (vid.duration || 0);
+    }
+    pwrap.addEventListener('mousedown', e => { seeking = true; seekFromEvent(e); e.stopPropagation(); });
+    document.addEventListener('mousemove', e => { if (seeking) seekFromEvent(e); });
+    document.addEventListener('mouseup',   () => { seeking = false; });
+
+    /* tooltip on hover */
+    pwrap.addEventListener('mousemove', function(e) {
+        const r = pwrap.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        tooltip.textContent = fmt(x * (vid.duration || 0));
+        tooltip.style.left = pct(x * 100);
+    });
+
+    /* ── volume ── */
+    function setVolCSS() {
+        volSlider.style.setProperty('--vol', (vid.muted ? 0 : vid.volume * 100) + '%');
+    }
+    volSlider.addEventListener('input', function() {
+        vid.volume = parseFloat(this.value);
+        vid.muted  = false;
+        setVolCSS();
+        syncVolIcon();
+    });
+    function syncVolIcon() {
+        const muted = vid.muted || vid.volume === 0;
+        volIcon.innerHTML = muted
+            ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>'
+            : vid.volume < 0.5
+            ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>'
+            : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+        setVolCSS();
+    }
+    $('vpBtnMute').addEventListener('click', () => { vid.muted = !vid.muted; syncVolIcon(); });
+
+    /* ── buffering spinner ── */
+    vid.addEventListener('waiting',  () => spinner.classList.add('show'));
+    vid.addEventListener('playing',  () => spinner.classList.remove('show'));
+    vid.addEventListener('canplay',  () => spinner.classList.remove('show'));
+
+    /* ── speed ── */
+    speedPill.addEventListener('click', function(e) {
+        e.stopPropagation();
+        settPanel.classList.remove('open');
+        speedPanel.classList.toggle('open');
+    });
+    speedPanel.querySelectorAll('.vp-speed-opt').forEach(opt => {
+        opt.addEventListener('click', function() {
+            const sp = parseFloat(this.dataset.speed);
+            vid.playbackRate = sp;
+            speedPanel.querySelectorAll('.vp-speed-opt').forEach(o => o.classList.remove('active'));
+            this.classList.add('active');
+            speedPill.textContent = sp === 1 ? '1×' : sp + '×';
+            speedPanel.classList.remove('open');
+            showToast('Speed: ' + speedPill.textContent);
+        });
+    });
+
+    /* ── settings panel ── */
+    settBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        speedPanel.classList.remove('open');
+        settPanel.classList.toggle('open');
+    });
+    document.addEventListener('click', () => { speedPanel.classList.remove('open'); settPanel.classList.remove('open'); });
+
+    /* Loop */
+    $('vpSetLoop').addEventListener('click', function(e) { e.stopPropagation(); toggleSetting(togLoop, 'loop'); });
+    function toggleSetting(el, key) {
+        el.classList.toggle('on');
+        if (key === 'loop') { vid.loop = el.classList.contains('on'); showToast('Loop ' + (vid.loop ? 'on' : 'off')); }
+        if (key === 'mirror') {
+            const on = el.classList.contains('on');
+            vid.style.transform = on ? 'scaleX(-1)' : '';
+            showToast('Mirror ' + (on ? 'on' : 'off'));
+        }
+    }
+    /* Mirror */
+    $('vpSetMirror').addEventListener('click', function(e) { e.stopPropagation(); toggleSetting(togMirror, 'mirror'); });
+    /* PiP */
+    $('vpSetPip').addEventListener('click', function(e) {
+        e.stopPropagation();
+        settPanel.classList.remove('open');
+        if (document.pictureInPictureElement) { document.exitPictureInPicture(); }
+        else if (vid.requestPictureInPicture) { vid.requestPictureInPicture().catch(() => showToast('PiP not supported')); }
+        else showToast('PiP not supported');
+    });
+
+    /* ── fullscreen ── */
+    const FS_EXPAND  = '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+    const FS_SHRINK  = '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 0 2-2h3M3 16h3a2 2 0 0 0 2 2v3"/>';
+    fsBtn.addEventListener('click', function() {
+        if (!document.fullscreenElement) { shell.requestFullscreen && shell.requestFullscreen(); }
+        else { document.exitFullscreen && document.exitFullscreen(); }
+    });
+    document.addEventListener('fullscreenchange', () => {
+        fsIcon.innerHTML = document.fullscreenElement ? FS_SHRINK : FS_EXPAND;
+    });
+
+    /* ── keyboard shortcuts ── */
+    let toastTimer;
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.remove('hide'); toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.classList.remove('show','hide'), 400); }, 1800);
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) { e.preventDefault(); return; }
+        switch(e.key) {
+            case ' ': case 'k': e.preventDefault(); togglePlay(); showToast(vid.paused ? '⏸ Paused' : '▶ Playing'); break;
+            case 'ArrowLeft':  e.preventDefault(); seekBy(-10, true);  showToast('⏪ -10s'); break;
+            case 'ArrowRight': e.preventDefault(); seekBy(10, false);  showToast('⏩ +10s'); break;
+            case 'ArrowUp':    e.preventDefault(); vid.volume = Math.min(1, vid.volume + 0.1); vid.muted = false; syncVolIcon(); showToast('🔊 ' + Math.round(vid.volume*100) + '%'); break;
+            case 'ArrowDown':  e.preventDefault(); vid.volume = Math.max(0, vid.volume - 0.1); syncVolIcon(); showToast('🔉 ' + Math.round(vid.volume*100) + '%'); break;
+            case 'm': case 'M': vid.muted = !vid.muted; syncVolIcon(); showToast(vid.muted ? '🔇 Muted' : '🔊 Unmuted'); break;
+            case 'f': case 'F': fsBtn.click(); break;
+            case 'l': case 'L': $('vpSetLoop').click(); break;
+            case '>': { const sp = Math.min(2, vid.playbackRate + 0.25); vid.playbackRate = sp; speedPill.textContent = sp===1?'1×':sp+'×'; showToast('⚡ ' + speedPill.textContent); break; }
+            case '<': { const sp = Math.max(0.25, vid.playbackRate - 0.25); vid.playbackRate = sp; speedPill.textContent = sp===1?'1×':sp+'×'; showToast('🐢 ' + speedPill.textContent); break; }
+        }
+    });
+
+    /* ── external player links ── */
+    var videolink = window.location.href;
+    var Link = videolink.replace('/watch/', '/');
+    window.vlc_player    = () => window.location.href = 'vlc://' + Link;
+    window.mx_player     = () => window.location.href = 'intent:' + Link + '#Intent;package=com.mxtech.videoplayer.ad;end';
+    window.playit_player = () => window.location.href = 'playit://playerv2/video?url=' + Link;
+    window.s_player      = () => window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end';
+    window.km_player     = () => window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end';
+    window.hd_player     = () => window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end';
+    window.Download      = () => window.location.href = Link;
+
+    /* ── right-click guard ── */
+    document.addEventListener('contextmenu', e => e.preventDefault());
+})();
 </script>
 
 </body>
