@@ -126,160 +126,8 @@
             padding: 0 14px;
         }
 
-        /* ─── OTT BANNER ─── */
-        .ott-banner {
-            margin: 18px 14px 0;
-            max-width: 872px;
-            margin-left: auto;
-            margin-right: auto;
-            border-radius: 18px;
-            overflow: hidden;
-            background: linear-gradient(130deg, #0b0b1f 0%, #111125 50%, #0a1818 100%);
-            border: 1px solid rgba(245,197,24,0.22);
-            box-shadow:
-                0 0 0 1px rgba(0,0,0,0.6),
-                0 24px 60px rgba(0,0,0,0.55),
-                inset 0 1px 0 rgba(255,255,255,0.04);
-            position: relative;
-        }
 
-        .ott-banner::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 65% 65% at 5% 50%, rgba(245,197,24,0.07) 0%, transparent 55%),
-                radial-gradient(ellipse 55% 70% at 95% 50%, rgba(0,224,176,0.05) 0%, transparent 55%);
-            pointer-events: none;
-        }
 
-        .ott-glow-line {
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(245,197,24,0.6), rgba(0,224,176,0.4), transparent);
-        }
-
-        .ott-body {
-            padding: 18px 20px 16px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .ott-left { flex: 1; min-width: 0; }
-
-        .ott-badge-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        .ott-hot {
-            font-family: var(--font-h);
-            font-weight: 800;
-            font-size: 0.65rem;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-            color: #000;
-            background: linear-gradient(135deg, #f5c518, #e8a800);
-            padding: 4px 11px;
-            border-radius: 50px;
-            box-shadow: 0 3px 12px rgba(245,197,24,0.4);
-            white-space: nowrap;
-        }
-
-        .live-dot {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.7rem;
-            color: var(--accent2);
-            font-weight: 600;
-        }
-
-        .live-dot::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent2);
-            box-shadow: 0 0 8px var(--accent2);
-            animation: blink 1.8s ease infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .ott-headline {
-            font-family: var(--font-h);
-            font-size: clamp(0.88rem, 2.2vw, 1.05rem);
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.3px;
-            margin-bottom: 10px;
-            line-height: 1.3;
-        }
-
-        .ott-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 7px;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            border-radius: 50px;
-            font-size: 0.74rem;
-            font-weight: 500;
-            border: 1px solid;
-        }
-
-        .c-red  { color: #ff8f8f; border-color: rgba(255,92,92,0.35);  background: rgba(255,92,92,0.1); }
-        .c-pur  { color: #b3a8ff; border-color: rgba(124,111,255,0.35); background: rgba(124,111,255,0.1); }
-        .c-teal { color: #5de8cc; border-color: rgba(0,224,176,0.3);   background: rgba(0,224,176,0.09); }
-        .c-gold { color: #f5c518; border-color: rgba(245,197,24,0.3);  background: rgba(245,197,24,0.08); }
-
-        .ott-cta-wrap { flex-shrink: 0; }
-
-        .ott-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 22px;
-            border-radius: 50px;
-            font-family: var(--font-h);
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #fff;
-            text-decoration: none;
-            background: linear-gradient(135deg, #7c6fff, #5c53d0);
-            box-shadow: 0 5px 20px rgba(124,111,255,0.45);
-            transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
-            white-space: nowrap;
-        }
-        .ott-cta:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 12px 32px rgba(124,111,255,0.6);
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .ott-note {
-            padding: 9px 20px 12px;
-            font-size: 0.72rem;
-            color: var(--muted2);
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            border-top: 1px solid var(--border);
-        }
 
         /* ─── FILE TITLE ─── */
         .file-title-area {
@@ -339,6 +187,180 @@
 
         /* Plyr accent */
         :root { --plyr-color-main: #7c6fff; }
+
+        /* Player loading skeleton */
+        .player-shell { position: relative; aspect-ratio: 16 / 9; }
+        .player-shell.is-loading::before {
+            content: '';
+            position: absolute; inset: 0;
+            background:
+                linear-gradient(110deg, transparent 25%, rgba(124,111,255,0.08) 45%, transparent 65%) 0 0 / 200% 100%,
+                #0a0a14;
+            animation: shimmer 1.4s linear infinite;
+            z-index: 2;
+        }
+        .player-shell.is-loading::after {
+            content: '';
+            position: absolute; top: 50%; left: 50%;
+            width: 46px; height: 46px;
+            margin: -23px 0 0 -23px;
+            border-radius: 50%;
+            border: 3px solid rgba(124,111,255,0.18);
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+            z-index: 3;
+        }
+        @keyframes shimmer { to { background-position: -200% 0, 0 0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Double-tap seek ripple (mobile) */
+        .seek-ripple {
+            position: absolute;
+            top: 50%; transform: translateY(-50%);
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: rgba(124,111,255,0.22);
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-h); font-weight: 700; font-size: 0.78rem;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 5;
+        }
+        .seek-ripple.left  { left: 6%; }
+        .seek-ripple.right { right: 6%; }
+        .seek-ripple.show { animation: rippleFx 0.55s ease forwards; }
+        @keyframes rippleFx {
+            0%   { opacity: 0; transform: translateY(-50%) scale(0.6); }
+            40%  { opacity: 1; transform: translateY(-50%) scale(1); }
+            100% { opacity: 0; transform: translateY(-50%) scale(1.15); }
+        }
+
+        /* Player error overlay */
+        .player-error {
+            position: absolute; inset: 0;
+            background: rgba(7,7,15,0.92);
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 10px; padding: 20px; text-align: center;
+            z-index: 4;
+        }
+        .player-error.show { display: flex; }
+        .player-error svg { color: #ff8080; }
+        .player-error .pe-title { font-family: var(--font-h); font-weight: 700; color: #fff; font-size: 0.95rem; }
+        .player-error .pe-sub { color: var(--muted2); font-size: 0.8rem; max-width: 320px; }
+        .player-error .pe-retry {
+            margin-top: 6px;
+            padding: 9px 20px; border-radius: 50px;
+            background: var(--accent); color: #fff;
+            border: 0; cursor: pointer; font-weight: 700; font-family: var(--font-h);
+        }
+
+        /* Toast (resume/info messages) */
+        .toast-stack {
+            position: fixed;
+            top: 70px; right: 16px;
+            display: flex; flex-direction: column; gap: 8px;
+            z-index: 500;
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(20,20,40,0.95);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border2);
+            border-left: 3px solid var(--accent);
+            color: var(--text);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            transform: translateX(120%);
+            animation: toastIn 0.35s ease forwards, toastOut 0.35s ease forwards 3.6s;
+            pointer-events: auto;
+            max-width: 320px;
+        }
+        @keyframes toastIn  { to { transform: translateX(0); } }
+        @keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
+
+        /* Sticky mini-player chip (when scrolled past) */
+        .mini-player {
+            position: fixed;
+            bottom: 16px; left: 16px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px 8px 10px;
+            background: rgba(13,13,26,0.95);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--border2);
+            border-radius: 50px;
+            box-shadow: 0 14px 32px rgba(0,0,0,0.55);
+            z-index: 400;
+            cursor: pointer;
+            max-width: calc(100% - 32px);
+            animation: miniIn 0.3s ease;
+        }
+        .mini-player.visible { display: inline-flex; }
+        @keyframes miniIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .mini-dot {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: var(--accent);
+            display: grid; place-items: center;
+            color: #fff;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .mini-dot::after {
+            content: '';
+            position: absolute; inset: -3px;
+            border-radius: 50%;
+            border: 2px solid rgba(124,111,255,0.4);
+            animation: pulseRing 1.6s ease infinite;
+        }
+        @keyframes pulseRing { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.3); opacity: 0; } }
+        .mini-text {
+            font-family: var(--font-h);
+            font-weight: 600;
+            font-size: 0.78rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        .mini-close {
+            background: transparent;
+            border: 0;
+            color: var(--muted2);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 4px;
+        }
+        .mini-close:hover { color: var(--text); }
+
+        /* Download size hint */
+        .dl-size {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--muted2);
+            margin-left: 4px;
+            opacity: 0.85;
+        }
+
+        /* Report link */
+        .report-row {
+            text-align: center;
+            margin-top: 10px;
+        }
+        .report-link {
+            font-size: 0.74rem;
+            color: var(--muted);
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(255,255,255,0.12);
+            padding-bottom: 1px;
+        }
+        .report-link:hover { color: #f5aaaa; border-color: rgba(255,128,128,0.3); }
+
 
         /* ─── EXTERNAL PLAYERS ─── */
         .ext-section {
@@ -654,49 +676,6 @@
     </div>
 </nav>
 
-<!-- ─── OTT PROMO BANNER ─── -->
-<div style="max-width:900px;margin:18px auto 0;padding:0 14px;" class="au d2">
-    <div class="ott-banner">
-        <div class="ott-glow-line"></div>
-        <div class="ott-body">
-            <div class="ott-left">
-                <div class="ott-badge-row">
-                    <span class="ott-hot">🔥 Best Prices</span>
-                    <span class="live-dot">Available Now</span>
-                </div>
-                <div class="ott-headline">OTT Subscriptions, AI Tools, Softwares &amp; VPNs<br>— All at Unbeatable Prices</div>
-                <div class="ott-chips">
-                    <span class="chip c-red">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/></svg>
-                        OTT Subscriptions
-                    </span>
-                    <span class="chip c-pur">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"/></svg>
-                        AI Tools
-                    </span>
-                    <span class="chip c-teal">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>
-                        Softwares
-                    </span>
-                    <span class="chip c-gold">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/><path d="M8 4a.5.5 0 0 1 .5.5v3.793l2.146 2.147a.5.5 0 0 1-.708.707L7.5 8.707V4.5A.5.5 0 0 1 8 4z"/></svg>
-                        VPNs
-                    </span>
-                </div>
-            </div>
-            <div class="ott-cta-wrap">
-                <a href="https://t.me/MMNOTTMARTZ" target="_blank" class="ott-cta">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
-                    Get Deals →
-                </a>
-            </div>
-        </div>
-        <div class="ott-note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
-            Cheap prices • Instant delivery • Trusted seller — Limited slots only!
-        </div>
-    </div>
-</div>
 
 <!-- ─── FILE TITLE ─── -->
 <div class="file-title-area au d3">
@@ -706,10 +685,18 @@
 
 <!-- ─── VIDEO PLAYER ─── -->
 <div class="player-area au d3">
-    <div class="player-shell">
-        <video id="player" class="player" playsinline controls>
+    <div class="player-shell is-loading" id="playerShell">
+        <video id="player" class="player" playsinline controls preload="metadata">
             <source src="{{file_url}}" type="video/mp4">
         </video>
+        <div class="seek-ripple left"  id="seekLeft">« 10s</div>
+        <div class="seek-ripple right" id="seekRight">10s »</div>
+        <div class="player-error" id="playerError">
+            <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+            <div class="pe-title">Playback failed</div>
+            <div class="pe-sub">This video can't play in your browser. Try an external player below or download the file.</div>
+            <button class="pe-retry" id="retryBtn">Retry</button>
+        </div>
     </div>
 </div>
 
@@ -717,6 +704,7 @@
 <div class="ext-section au d4">
     <div class="sec-head">Open with external player</div>
     <div class="player-grid">
+
 
         <div class="pcell" onclick="vlc_player()">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
@@ -776,7 +764,7 @@
 
     <div class="dl-btn" onclick="Download()">
         <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-        Download File
+        Download File<span class="dl-size" id="dlSize"></span>
     </div>
 </div>
 
@@ -788,7 +776,11 @@
         </div>
         <p class="notice-text"><strong>Video Not Playing?</strong> Your browser may not support this codec. Try an external player above or download the file to watch offline.</p>
     </div>
+    <div class="report-row">
+        <a class="report-link" href="https://t.me/YourAdminUsername?text=Broken+link%3A+{{file_name}}" target="_blank">Report broken link</a>
+    </div>
 </div>
+
 
 <!-- ─── TELEGRAM CARD ─── -->
 <div class="tg-area au d6">
@@ -822,46 +814,240 @@
     </div>
 </div>
 
+<!-- ─── TOAST + MINI-PLAYER ─── -->
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+<div class="mini-player" id="miniPlayer" title="Back to player">
+    <span class="mini-dot">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M10.804 8 5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/></svg>
+    </span>
+    <span class="mini-text" id="miniText">Now Playing</span>
+    <button class="mini-close" id="miniClose" aria-label="Dismiss">×</button>
+</div>
+
 <!-- ─── SCRIPTS ─── -->
 <script src="https://cdn.plyr.io/3.6.9/plyr.js"></script>
 <script>
-    // Title truncate
+(function () {
+    'use strict';
+
+    // ── Title truncate
     var div = document.getElementById('myDiv');
+    var fullTitle = '';
     if (div) {
-        var t = div.textContent || div.innerText;
-        if (t.length > 72) { div.textContent = t.slice(0, 72) + '…'; }
+        fullTitle = div.textContent || div.innerText;
+        if (fullTitle.length > 72) { div.textContent = fullTitle.slice(0, 72) + '…'; }
     }
 
-    // Plyr
-    var controls = ['play-large','rewind','play','fast-forward','progress','current-time','duration','mute','volume','captions','settings','pip','airplay','download','fullscreen'];
-    document.addEventListener('DOMContentLoaded', function() {
-        Plyr.setup('.player', { controls: controls });
-    });
-
-    // External player links
+    // ── External player links
     var videolink = window.location.href;
     var Link = videolink.replace('/watch/', '/');
+    window.vlc_player    = function () { window.location.href = 'vlc://' + Link; };
+    window.mx_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=com.mxtech.videoplayer.ad;end'; };
+    window.playit_player = function () { window.location.href = 'playit://playerv2/video?url=' + Link; };
+    window.s_player      = function () { window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end'; };
+    window.km_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end'; };
+    window.hd_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end'; };
+    window.Download      = function () { window.location.href = Link; };
 
-    function vlc_player()    { window.location.href = 'vlc://' + Link; }
-    function mx_player()     { window.location.href = 'intent:' + Link + '#Intent;package=com.mxtech.videoplayer.ad;end'; }
-    function playit_player() { window.location.href = 'playit://playerv2/video?url=' + Link; }
-    function s_player()      { window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end'; }
-    function km_player()     { window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end'; }
-    function hd_player()     { window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end'; }
-    function Download()      { window.location.href = Link; }
+    // ── Storage key from file URL (stable per video)
+    var STORAGE_KEY = 'tcu:' + Link;
+    var PREF_KEY    = 'tcu:prefs';
 
-    // Disable right-click & devtools shortcuts
-    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12' ||
-            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-            (e.ctrlKey && e.key === 'u') ||
-            e.ctrlKey || e.shiftKey || e.altKey) {
-            e.preventDefault();
+    function loadJSON(k, fallback) {
+        try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : fallback; }
+        catch (e) { return fallback; }
+    }
+    function saveJSON(k, v) {
+        try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+    }
+
+    // ── Toast helper
+    var toastStack = document.getElementById('toastStack');
+    function toast(msg) {
+        if (!toastStack) return;
+        var t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        toastStack.appendChild(t);
+        setTimeout(function () { t.remove(); }, 4200);
+    }
+
+    // ── Format helpers
+    function fmtTime(s) {
+        s = Math.floor(s);
+        var m = Math.floor(s / 60), sec = s % 60;
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+    function fmtBytes(b) {
+        if (!b) return '';
+        var u = ['B','KB','MB','GB']; var i = 0;
+        while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+        return b.toFixed(b >= 10 ? 0 : 1) + ' ' + u[i];
+    }
+
+    // ── File size hint (HEAD request)
+    var dlSize = document.getElementById('dlSize');
+    if (dlSize && /^https?:/i.test(Link)) {
+        fetch(Link, { method: 'HEAD' }).then(function (r) {
+            var len = r.headers.get('content-length');
+            if (len) dlSize.textContent = ' · ' + fmtBytes(parseInt(len, 10));
+        }).catch(function () {});
+    }
+
+    // ── Plyr setup
+    var controls = ['play-large','rewind','play','fast-forward','progress','current-time','duration','mute','volume','captions','settings','pip','airplay','download','fullscreen'];
+    var shell    = document.getElementById('playerShell');
+    var errBox   = document.getElementById('playerError');
+    var retryBtn = document.getElementById('retryBtn');
+    var videoEl  = document.getElementById('player');
+    var seekL    = document.getElementById('seekLeft');
+    var seekR    = document.getElementById('seekRight');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var player = new Plyr('#player', {
+            controls: controls,
+            seekTime: 10,
+            keyboard: { focused: true, global: false },
+            tooltips: { controls: true, seek: true },
+            speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] }
+        });
+
+        var prefs = loadJSON(PREF_KEY, { vol: 1, muted: false, speed: 1 });
+        var state = loadJSON(STORAGE_KEY, null);
+
+        // Apply saved volume / speed
+        player.on('ready', function () {
+            if (typeof prefs.vol === 'number') player.volume = prefs.vol;
+            if (typeof prefs.muted === 'boolean') player.muted = prefs.muted;
+            if (typeof prefs.speed === 'number') { try { player.speed = prefs.speed; } catch (e) {} }
+        });
+
+        // Hide skeleton when ready / show on stall
+        videoEl.addEventListener('loadeddata',  function () { shell.classList.remove('is-loading'); });
+        videoEl.addEventListener('canplay',     function () { shell.classList.remove('is-loading'); });
+        videoEl.addEventListener('waiting',     function () { shell.classList.add('is-loading'); });
+        videoEl.addEventListener('playing',     function () { shell.classList.remove('is-loading'); });
+
+        // Resume playback
+        videoEl.addEventListener('loadedmetadata', function () {
+            if (state && state.t && state.d && state.t > 5 && state.t < state.d - 10) {
+                videoEl.currentTime = state.t;
+                toast('Resumed from ' + fmtTime(state.t));
+            }
+        });
+
+        // Persist position (throttled)
+        var lastSave = 0;
+        videoEl.addEventListener('timeupdate', function () {
+            var now = Date.now();
+            if (now - lastSave < 3000) return;
+            lastSave = now;
+            if (videoEl.duration && !isNaN(videoEl.duration)) {
+                saveJSON(STORAGE_KEY, { t: videoEl.currentTime, d: videoEl.duration });
+            }
+        });
+        videoEl.addEventListener('ended', function () {
+            try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        });
+
+        // Persist volume / speed
+        player.on('volumechange', function () {
+            prefs.vol = player.volume; prefs.muted = player.muted; saveJSON(PREF_KEY, prefs);
+        });
+        player.on('ratechange', function () {
+            prefs.speed = player.speed; saveJSON(PREF_KEY, prefs);
+        });
+
+        // Error overlay
+        videoEl.addEventListener('error', function () {
+            shell.classList.remove('is-loading');
+            errBox.classList.add('show');
+        });
+        retryBtn.addEventListener('click', function () {
+            errBox.classList.remove('show');
+            shell.classList.add('is-loading');
+            videoEl.load();
+        });
+
+        // ── Keyboard shortcuts (global, lightweight)
+        function isTyping(el) {
+            return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
         }
+        document.addEventListener('keydown', function (e) {
+            if (isTyping(document.activeElement)) return;
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+            var k = e.key;
+            var handled = true;
+            if (k === ' ' || k === 'k')      { player.togglePlay(); }
+            else if (k === 'ArrowLeft' || k === 'j')  { player.rewind(10);  flashSeek(seekL); }
+            else if (k === 'ArrowRight' || k === 'l') { player.forward(10); flashSeek(seekR); }
+            else if (k === 'ArrowUp')   { player.volume = Math.min(1, player.volume + 0.1); }
+            else if (k === 'ArrowDown') { player.volume = Math.max(0, player.volume - 0.1); }
+            else if (k === 'm') { player.muted = !player.muted; }
+            else if (k === 'f') { player.fullscreen.toggle(); }
+            else if (k === '0') { player.currentTime = 0; }
+            else if (/^[1-9]$/.test(k)) { player.currentTime = (player.duration || 0) * (parseInt(k,10)/10); }
+            else { handled = false; }
+            if (handled) e.preventDefault();
+        });
+
+        // ── Mobile double-tap to seek
+        function flashSeek(el) { el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
+        var lastTap = 0, lastSide = null;
+        videoEl.addEventListener('touchend', function (e) {
+            var rect = videoEl.getBoundingClientRect();
+            var x = e.changedTouches[0].clientX - rect.left;
+            var side = x < rect.width / 2 ? 'L' : 'R';
+            var now = Date.now();
+            if (now - lastTap < 320 && side === lastSide) {
+                if (side === 'L') { player.rewind(10);  flashSeek(seekL); }
+                else              { player.forward(10); flashSeek(seekR); }
+                e.preventDefault();
+                lastTap = 0;
+            } else {
+                lastTap = now; lastSide = side;
+            }
+        }, { passive: false });
+
+        // ── Auto-fullscreen on landscape (mobile only)
+        if (window.matchMedia('(pointer: coarse)').matches && window.screen && window.screen.orientation) {
+            window.screen.orientation.addEventListener('change', function () {
+                var landscape = window.screen.orientation.type.indexOf('landscape') === 0;
+                if (landscape && !player.paused) { try { player.fullscreen.enter(); } catch (e) {} }
+            });
+        }
+
+        // ── Sticky mini-player when scrolled past the player
+        var mini      = document.getElementById('miniPlayer');
+        var miniText  = document.getElementById('miniText');
+        var miniClose = document.getElementById('miniClose');
+        var dismissed = false;
+        miniText.textContent = (fullTitle || 'Now Playing').slice(0, 48);
+        miniClose.addEventListener('click', function (e) {
+            e.stopPropagation(); dismissed = true; mini.classList.remove('visible');
+        });
+        mini.addEventListener('click', function () {
+            shell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (dismissed) return;
+                if (!en.isIntersecting && !videoEl.paused) mini.classList.add('visible');
+                else mini.classList.remove('visible');
+            });
+        }, { threshold: 0.15 });
+        io.observe(shell);
+        videoEl.addEventListener('pause', function () { mini.classList.remove('visible'); });
     });
+
+    // ── Light right-click block (kept), no aggressive shortcut blocker — kills UX
+    document.addEventListener('contextmenu', function (e) {
+        if (e.target && e.target.closest('.player-shell')) e.preventDefault();
+    });
+})();
 </script>
 
 </body>
 </html>
 <!--  Don't Remove Credit @VJ_Bots Subscribe YouTube Channel For Amazing Bot @Tech_VJ Ask Doubt on telegram @KingVJ01 -->
+
