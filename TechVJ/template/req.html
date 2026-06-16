@@ -1,0 +1,867 @@
+<!--  Don't Remove Credit @VJ_Bots Subscribe YouTube Channel For Amazing Bot @Tech_VJ Ask Doubt on telegram @KingVJ01 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" href="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" type="image/x-icon">
+    <meta property="og:image" content="https://i.ibb.co/qJyZWCv/20230629-081948-0000.png" itemprop="thumbnailUrl">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{file_name}}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.9/plyr.css" />
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:       #07070f;
+            --surface:  #0d0d1a;
+            --card:     #111120;
+            --card2:    #141428;
+            --border:   rgba(255,255,255,0.06);
+            --border2:  rgba(255,255,255,0.1);
+            --accent:   #7c6fff;
+            --accent2:  #00e0b0;
+            --tg-blue:  #229ed9;
+            --gold:     #f5c518;
+            --red:      #ff5c5c;
+            --text:     #e4e4f0;
+            --muted:    #5a5a78;
+            --muted2:   #8888aa;
+            --font-h:   'Syne', sans-serif;
+            --font-b:   'DM Sans', sans-serif;
+            --r:        16px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-b);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* BG GLOW */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 55% 45% at 10% 15%, rgba(124,111,255,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse 45% 40% at 90% 85%, rgba(0,224,176,0.08) 0%, transparent 55%),
+                radial-gradient(ellipse 35% 30% at 80% 10%, rgba(245,197,24,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body > * { position: relative; z-index: 1; }
+
+        /* ─── TOPBAR ─── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(7,7,15,0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--border);
+            padding: 11px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand {
+            font-family: var(--font-h);
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(100deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tg-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(34,158,217,0.3);
+            background: rgba(34,158,217,0.1);
+            color: #70c8f0;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.22s ease;
+            white-space: nowrap;
+        }
+        .tg-pill:hover {
+            background: rgba(34,158,217,0.22);
+            border-color: rgba(34,158,217,0.5);
+            color: #a8dcf5;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        /* ─── WRAPPER ─── */
+        .wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 14px;
+        }
+
+        /* ─── OTT BANNER ─── */
+        .ott-banner {
+            margin: 18px 14px 0;
+            max-width: 872px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 18px;
+            overflow: hidden;
+            background: linear-gradient(130deg, #0b0b1f 0%, #111125 50%, #0a1818 100%);
+            border: 1px solid rgba(245,197,24,0.22);
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.6),
+                0 24px 60px rgba(0,0,0,0.55),
+                inset 0 1px 0 rgba(255,255,255,0.04);
+            position: relative;
+        }
+
+        .ott-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 65% 65% at 5% 50%, rgba(245,197,24,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 70% at 95% 50%, rgba(0,224,176,0.05) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .ott-glow-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(245,197,24,0.6), rgba(0,224,176,0.4), transparent);
+        }
+
+        .ott-body {
+            padding: 18px 20px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .ott-left { flex: 1; min-width: 0; }
+
+        .ott-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .ott-hot {
+            font-family: var(--font-h);
+            font-weight: 800;
+            font-size: 0.65rem;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: #000;
+            background: linear-gradient(135deg, #f5c518, #e8a800);
+            padding: 4px 11px;
+            border-radius: 50px;
+            box-shadow: 0 3px 12px rgba(245,197,24,0.4);
+            white-space: nowrap;
+        }
+
+        .live-dot {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            color: var(--accent2);
+            font-weight: 600;
+        }
+
+        .live-dot::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            box-shadow: 0 0 8px var(--accent2);
+            animation: blink 1.8s ease infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .ott-headline {
+            font-family: var(--font-h);
+            font-size: clamp(0.88rem, 2.2vw, 1.05rem);
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.3px;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .ott-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.74rem;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .c-red  { color: #ff8f8f; border-color: rgba(255,92,92,0.35);  background: rgba(255,92,92,0.1); }
+        .c-pur  { color: #b3a8ff; border-color: rgba(124,111,255,0.35); background: rgba(124,111,255,0.1); }
+        .c-teal { color: #5de8cc; border-color: rgba(0,224,176,0.3);   background: rgba(0,224,176,0.09); }
+        .c-gold { color: #f5c518; border-color: rgba(245,197,24,0.3);  background: rgba(245,197,24,0.08); }
+
+        .ott-cta-wrap { flex-shrink: 0; }
+
+        .ott-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-family: var(--font-h);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            text-decoration: none;
+            background: linear-gradient(135deg, #7c6fff, #5c53d0);
+            box-shadow: 0 5px 20px rgba(124,111,255,0.45);
+            transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
+            white-space: nowrap;
+        }
+        .ott-cta:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 32px rgba(124,111,255,0.6);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .ott-note {
+            padding: 9px 20px 12px;
+            font-size: 0.72rem;
+            color: var(--muted2);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ─── FILE TITLE ─── */
+        .file-title-area {
+            padding: 22px 14px 10px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .file-label {
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-label::before {
+            content: '';
+            display: inline-block;
+            width: 3px;
+            height: 12px;
+            border-radius: 2px;
+            background: var(--accent);
+        }
+
+        .file-name {
+            font-family: var(--font-h);
+            font-size: clamp(0.92rem, 2.2vw, 1.15rem);
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.4px;
+        }
+
+        /* ─── PLAYER ─── */
+        .player-area {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 14px;
+        }
+
+        .player-shell {
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(124,111,255,0.18);
+            box-shadow:
+                0 0 0 1px rgba(0,0,0,0.7),
+                0 32px 80px rgba(0,0,0,0.75),
+                0 0 80px rgba(124,111,255,0.07);
+            background: #000;
+        }
+
+        .player-shell video { width: 100%; display: block; }
+
+        /* Plyr accent */
+        :root { --plyr-color-main: #7c6fff; }
+
+        /* ─── EXTERNAL PLAYERS ─── */
+        .ext-section {
+            max-width: 900px;
+            margin: 22px auto 0;
+            padding: 0 14px;
+        }
+
+        .sec-head {
+            font-size: 0.67rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sec-head::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        @media (min-width: 500px) { .player-grid { grid-template-columns: repeat(6, 1fr); } }
+
+        .pcell {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 15px 8px 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+            user-select: none;
+        }
+
+        .pcell:hover {
+            background: rgba(124,111,255,0.1);
+            border-color: rgba(124,111,255,0.32);
+            transform: translateY(-5px);
+            box-shadow: 0 14px 32px rgba(0,0,0,0.45), 0 0 20px rgba(124,111,255,0.1);
+        }
+
+        .pcell:active { transform: translateY(-2px) scale(0.96); }
+
+        .pname {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--muted2);
+            letter-spacing: 0.2px;
+            text-align: center;
+        }
+
+        .pcell:hover .pname { color: #c0b8ff; }
+
+        .dl-btn {
+            width: 100%;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(0,224,176,0.08);
+            border: 1px solid rgba(0,224,176,0.22);
+            color: var(--accent2);
+            font-family: var(--font-h);
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .dl-btn:hover {
+            background: rgba(0,224,176,0.16);
+            border-color: rgba(0,224,176,0.42);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,224,176,0.14);
+        }
+
+        /* ─── NOTICE ─── */
+        .notice-area {
+            max-width: 900px;
+            margin: 18px auto 0;
+            padding: 0 14px;
+        }
+
+        .notice-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 13px 16px;
+            border-radius: 12px;
+            background: rgba(255,92,92,0.06);
+            border: 1px solid rgba(255,92,92,0.18);
+        }
+
+        .notice-icon {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,92,92,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notice-text {
+            font-size: 0.8rem;
+            color: #f5aaaa;
+            line-height: 1.55;
+        }
+
+        .notice-text strong { color: #ffcece; }
+
+        /* ─── TELEGRAM CARD ─── */
+        .tg-area {
+            max-width: 900px;
+            margin: 22px auto 44px;
+            padding: 0 14px;
+        }
+
+        .tg-card {
+            border-radius: 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+            position: relative;
+        }
+
+        .tg-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 60% at 0% 0%, rgba(124,111,255,0.07) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 55% at 100% 100%, rgba(34,158,217,0.05) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .tg-top-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--tg-blue), var(--accent2));
+        }
+
+        .tg-body { padding: 26px 24px 22px; }
+
+        .tg-title {
+            font-family: var(--font-h);
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        .tg-desc {
+            font-size: 0.82rem;
+            color: var(--muted2);
+            margin-bottom: 22px;
+        }
+
+        .tg-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 11px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 460px) { .tg-btns { grid-template-columns: 1fr; } }
+
+        .tg-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-family: var(--font-h);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            letter-spacing: 0.2px;
+        }
+
+        .tg-btn-solid {
+            background: linear-gradient(135deg, #229ed9, #1880b5);
+            color: #fff;
+            box-shadow: 0 5px 18px rgba(34,158,217,0.35);
+        }
+
+        .tg-btn-solid:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(34,158,217,0.5);
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .tg-btn-ghost {
+            background: rgba(34,158,217,0.08);
+            color: #70c8f0;
+            border: 1px solid rgba(34,158,217,0.28);
+        }
+
+        .tg-btn-ghost:hover {
+            background: rgba(34,158,217,0.18);
+            border-color: rgba(34,158,217,0.5);
+            color: #a8e4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 26px rgba(34,158,217,0.18);
+            text-decoration: none;
+        }
+
+        .tg-sep {
+            height: 1px;
+            margin: 0 -24px 20px;
+            background: linear-gradient(90deg, transparent, var(--border2), transparent);
+        }
+
+        .admin-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .admin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 26px;
+            border-radius: 50px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            color: var(--muted2);
+            font-size: 0.83rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.22s ease;
+        }
+
+        .admin-btn:hover {
+            background: rgba(124,111,255,0.1);
+            border-color: rgba(124,111,255,0.3);
+            color: #c4bcff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(124,111,255,0.15);
+            text-decoration: none;
+        }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .au  { animation: fadeUp 0.5s ease both; }
+        .d1  { animation-delay: 0.05s; }
+        .d2  { animation-delay: 0.15s; }
+        .d3  { animation-delay: 0.25s; }
+        .d4  { animation-delay: 0.35s; }
+        .d5  { animation-delay: 0.45s; }
+        .d6  { animation-delay: 0.55s; }
+
+        /* OTT mobile tweak */
+        @media (max-width: 520px) {
+            .ott-body { flex-direction: column; }
+            .ott-cta-wrap { width: 100%; }
+            .ott-cta { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ─── TOPBAR ─── -->
+<nav class="topbar au d1">
+    <a class="brand" href="https://t.me/TeluguCinematic_universe" target="_blank">TCU</a>
+    <div class="topbar-right">
+        <a class="tg-pill" href="https://t.me/YourChannel1" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/>
+            </svg>
+            Join Channel
+        </a>
+    </div>
+</nav>
+
+<!-- ─── OTT PROMO BANNER ─── -->
+<div style="max-width:900px;margin:18px auto 0;padding:0 14px;" class="au d2">
+    <div class="ott-banner">
+        <div class="ott-glow-line"></div>
+        <div class="ott-body">
+            <div class="ott-left">
+                <div class="ott-badge-row">
+                    <span class="ott-hot">🔥 Best Prices</span>
+                    <span class="live-dot">Available Now</span>
+                </div>
+                <div class="ott-headline">OTT Subscriptions, AI Tools, Softwares &amp; VPNs<br>— All at Unbeatable Prices</div>
+                <div class="ott-chips">
+                    <span class="chip c-red">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8.051 1.999h.089c.822.003 4.987.033 6.11.335a2.01 2.01 0 0 1 1.415 1.42c.101.38.172.883.22 1.402l.01.104.022.26.008.104c.065.914.073 1.77.074 1.957v.075c-.001.194-.01 1.108-.082 2.06l-.008.105-.009.104c-.05.572-.124 1.14-.235 1.558a2.007 2.007 0 0 1-1.415 1.42c-1.16.312-5.569.334-6.18.335h-.142c-.309 0-1.587-.006-2.927-.052l-.17-.006-.087-.004-.171-.007-.171-.007c-1.11-.049-2.167-.128-2.654-.26a2.007 2.007 0 0 1-1.415-1.419c-.111-.417-.185-.986-.235-1.558L.09 9.82l-.008-.104A31.4 31.4 0 0 1 0 7.68v-.123c.002-.215.01-.958.064-1.778l.007-.103.003-.052.008-.104.022-.26.01-.104c.048-.519.119-1.023.22-1.402a2.007 2.007 0 0 1 1.415-1.42c.487-.13 1.544-.21 2.654-.26l.17-.007.172-.006.086-.003.171-.007A99.788 99.788 0 0 1 7.858 2h.193zM6.4 5.209v4.818l4.157-2.408L6.4 5.209z"/></svg>
+                        OTT Subscriptions
+                    </span>
+                    <span class="chip c-pur">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3h9.05zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8h2.05zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1h9.05z"/></svg>
+                        AI Tools
+                    </span>
+                    <span class="chip c-teal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg>
+                        Softwares
+                    </span>
+                    <span class="chip c-gold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 13A6 6 0 1 1 8 2a6 6 0 0 1 0 12z"/><path d="M8 4a.5.5 0 0 1 .5.5v3.793l2.146 2.147a.5.5 0 0 1-.708.707L7.5 8.707V4.5A.5.5 0 0 1 8 4z"/></svg>
+                        VPNs
+                    </span>
+                </div>
+            </div>
+            <div class="ott-cta-wrap">
+                <a href="https://t.me/MMNOTTMARTZ" target="_blank" class="ott-cta">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
+                    Get Deals →
+                </a>
+            </div>
+        </div>
+        <div class="ott-note">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+            Cheap prices • Instant delivery • Trusted seller — Limited slots only!
+        </div>
+    </div>
+</div>
+
+<!-- ─── FILE TITLE ─── -->
+<div class="file-title-area au d3">
+    <div class="file-label">Now Playing</div>
+    <div class="file-name" id="myDiv">{{file_name}}</div>
+</div>
+
+<!-- ─── VIDEO PLAYER ─── -->
+<div class="player-area au d3">
+    <div class="player-shell">
+        <video id="player" class="player" playsinline controls>
+            <source src="{{file_url}}" type="video/mp4">
+        </video>
+    </div>
+</div>
+
+<!-- ─── EXTERNAL PLAYERS ─── -->
+<div class="ext-section au d4">
+    <div class="sec-head">Open with external player</div>
+    <div class="player-grid">
+
+        <div class="pcell" onclick="vlc_player()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
+                <defs><linearGradient id="vg1" x1="32" x2="32" y1="16" y2="40" gradientUnits="userSpaceOnUse"><stop offset=".4" stop-color="#6dc7ff"/><stop offset="1" stop-color="#e6abff"/></linearGradient><linearGradient id="vg2" x1="32" x2="32" y1="7" y2="56" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1a6dff"/><stop offset="1" stop-color="#c822ff"/></linearGradient></defs>
+                <path fill="url(#vg1)" d="M32,31.25c2.891,0,5.255-.323,6.939-.712l2.409,7.664C37.765,39.116,33.881,39.25,32,39.25c-1.88,0-5.765-.134-9.347-1.049l2.408-7.663C26.745,30.927,29.11,31.25,32,31.25z M32.5,24.25c1.554,0,2.999-.141,4.343-.38l-2.429-7.729c-.587.063-1.211.109-1.914.109-1.1,0-2.062-.092-2.876-.229l-2.404,7.651C28.816,24.034,30.574,24.25,32.5,24.25z"/>
+                <path fill="url(#vg2)" d="M56.903,50.041l-2.216-10.779c-.513-2.265-2.52-3.847-4.881-3.847H45.09l-8.059-24.451c-.7-2.123-2.726-3.549-5.04-3.549-2.314,0-4.339,1.426-5.039,3.549L18.934,35.415h-4.491c-2.362,0-4.369,1.582-4.885,3.866L7.31,50.021c-.327,1.442.019,2.937.947,4.099C9.212,55.314,10.645,56,12.19,56h39.828c1.545,0,2.979-.685,3.934-1.88C56.88,52.958,57.226,51.464,56.903,50.041z"/>
+            </svg>
+            <span class="pname">VLC</span>
+        </div>
+
+        <div class="pcell" onclick="mx_player()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="#ffeb9b"/><circle cx="32" cy="32" r="21" fill="#f9dd8f"/>
+                <path fill="#8d6c9f" d="M32,6c14.336,0,26,11.664,26,26S46.336,58,32,58S6,46.336,6,32S17.664,6,32,6M32,4C16.536,4,4,16.536,4,32s12.536,28,28,28s28-12.536,28-28S47.464,4,32,4z"/>
+                <path fill="#fff8ee" d="M42.5,31.134l-17-9.815c-.667-.385-1.5.096-1.5.866v19.63c0,.77.833,1.251,1.5.866l17-9.815C43.167,32.481,43.167,31.519,42.5,31.134z"/>
+            </svg>
+            <span class="pname">MX Player</span>
+        </div>
+
+        <div class="pcell" onclick="playit_player()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 48 48">
+                <style>.pc2{fill:none;stroke:#22abbd;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5}</style>
+                <path class="pc2" d="m17,32.5v5c0,2.7614-2.2386,5-5,5h0c-2.7614,0-5-2.2386-5-5"/>
+                <path class="pc2" d="m7,37.5c0-2.7614,2.2386-5,5-5h25c2.2,0,4-1.8,4-4V9.5c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4v28"/>
+                <path class="pc2" d="m29.1876,18.467l-9.1448-5.2652c-.822-.4733-1.8482.12-1.8482,1.0685v10.5304c0,.9485,1.0262,1.5418,1.8482,1.0685l9.1448-5.2652c.8237-.4742.8237-1.6628,0-2.137Z"/>
+            </svg>
+            <span class="pname">Play-It</span>
+        </div>
+
+        <div class="pcell" onclick="km_player()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40">
+                <defs><linearGradient id="kg1" x1="76.124" x2="76.124" y1="12.7" y2="50.192" gradientTransform="matrix(-1 0 0 1 115.415 0)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1a6dff"/><stop offset="1" stop-color="#c822ff"/></linearGradient><linearGradient id="kg2" x1="23.708" x2="23.708" y1="13.698" y2="49.195" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6dc7ff"/><stop offset="1" stop-color="#e6abff"/></linearGradient></defs>
+                <path fill="url(#kg1)" d="M50.999,50.192c-.597,0-1.19-.179-1.702-.531L25.882,33.513c-.824-.568-1.31-1.505-1.298-2.506.013-1,.52-1.925,1.356-2.474l23.416-15.342c.923-.604,2.099-.655,3.07-.129C53.397,13.587,54,14.598,54,15.701v31.49c0,1.118-.615,2.136-1.605,2.656C51.955,50.078,51.476,50.192,50.999,50.192z"/>
+                <path fill="url(#kg2)" d="M10,15.701v31.49c0,1.612,1.809,2.561,3.135,1.646l23.416-16.149c1.169-.806,1.149-2.541-.039-3.319L13.096,14.028C11.766,13.157,10,14.111,10,15.701z"/>
+            </svg>
+            <span class="pname">KM Player</span>
+        </div>
+
+        <div class="pcell" onclick="s_player()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
+                <defs><linearGradient id="sg1" x1="35.5" x2="35.5" y1="7" y2="57" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1a6dff"/><stop offset="1" stop-color="#c822ff"/></linearGradient><linearGradient id="sg2" x1="26" x2="26" y1="14" y2="49" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6dc7ff"/><stop offset="1" stop-color="#e6abff"/></linearGradient></defs>
+                <path fill="url(#sg1)" d="M56.7,30c-.95-.5-9.83-5.54-9.92-5.6L16.69,7.42c-.91-.51-1.89-.56-2.62-.13C13.39,7.69,13,8.44,13,9.34v45.57c0,.81.35,1.47.96,1.83.3.17.63.26.98.26.42,0,.86-.12,1.29-.37l40.43-22.81c1.18-.67,1.35-1.52,1.34-1.97C57.99,31.11,57.52,30.43,56.7,30z"/>
+                <path fill="url(#sg2)" d="M35.11,31.89L17,49.47V14.33L35.11,31.89z"/>
+            </svg>
+            <span class="pname">S Player</span>
+        </div>
+
+        <div class="pcell" onclick="hd_player()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 512 512">
+                <path style="fill:#e53935;" d="M256,0C114.6,0,0,114.6,0,256s114.6,256,256,256s256-114.6,256-256S397.4,0,256,0z"/>
+                <polygon style="fill:#fff;" points="188,147 188,356 383,251.5"/>
+            </svg>
+            <span class="pname">HD 4K</span>
+        </div>
+
+    </div>
+
+    <div class="dl-btn" onclick="Download()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+        Download File
+    </div>
+</div>
+
+<!-- ─── CODEC NOTICE ─── -->
+<div class="notice-area au d5">
+    <div class="notice-box">
+        <div class="notice-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#ff8080" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+        </div>
+        <p class="notice-text"><strong>Video Not Playing?</strong> Your browser may not support this codec. Try an external player above or download the file to watch offline.</p>
+    </div>
+</div>
+
+<!-- ─── TELEGRAM CARD ─── -->
+<div class="tg-area au d6">
+    <div class="tg-card">
+        <div class="tg-top-line"></div>
+        <div class="tg-body">
+            <div class="tg-title">Stay Connected 📲</div>
+            <div class="tg-desc">Join our Telegram for more movies, shows &amp; updates</div>
+
+            <div class="tg-btns">
+                <a href="https://t.me/TeluguCinematic_universe" target="_blank" class="tg-btn tg-btn-solid">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
+                    Join Our Telegram Channel
+                </a>
+                <a href="https://t.me/TeluguCinematic_universe" target="_blank" class="tg-btn tg-btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/></svg>
+                    Join Our Telegram Channel
+                </a>
+            </div>
+
+            <div class="tg-sep"></div>
+
+            <div class="admin-row">
+                <div class="admin-label">Need help or support?</div>
+                <a href="https://t.me/YourAdminUsername" target="_blank" class="admin-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.029 10 8 10c-2.029 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/></svg>
+                    Contact Admin on Telegram
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── SCRIPTS ─── -->
+<script src="https://cdn.plyr.io/3.6.9/plyr.js"></script>
+<script>
+    // Title truncate
+    var div = document.getElementById('myDiv');
+    if (div) {
+        var t = div.textContent || div.innerText;
+        if (t.length > 72) { div.textContent = t.slice(0, 72) + '…'; }
+    }
+
+    // Plyr
+    var controls = ['play-large','rewind','play','fast-forward','progress','current-time','duration','mute','volume','captions','settings','pip','airplay','download','fullscreen'];
+    document.addEventListener('DOMContentLoaded', function() {
+        Plyr.setup('.player', { controls: controls });
+    });
+
+    // External player links
+    var videolink = window.location.href;
+    var Link = videolink.replace('/watch/', '/');
+
+    function vlc_player()    { window.location.href = 'vlc://' + Link; }
+    function mx_player()     { window.location.href = 'intent:' + Link + '#Intent;package=com.mxtech.videoplayer.ad;end'; }
+    function playit_player() { window.location.href = 'playit://playerv2/video?url=' + Link; }
+    function s_player()      { window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end'; }
+    function km_player()     { window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end'; }
+    function hd_player()     { window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end'; }
+    function Download()      { window.location.href = Link; }
+
+    // Disable right-click & devtools shortcuts
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+            (e.ctrlKey && e.key === 'u') ||
+            e.ctrlKey || e.shiftKey || e.altKey) {
+            e.preventDefault();
+        }
+    });
+</script>
+
+</body>
+</html>
+<!--  Don't Remove Credit @VJ_Bots Subscribe YouTube Channel For Amazing Bot @Tech_VJ Ask Doubt on telegram @KingVJ01 -->
