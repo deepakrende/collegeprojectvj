@@ -69,7 +69,6 @@ def clean_file_name(file_name):
     return new_file_name
 
 def add_space_between_e_and_number(input_string):
-    # Use regex to find 'e' or 'E' followed by a digit and add a space
     output_string = re.sub(r'(e|E)([0-9])', r'1 2', input_string)
     return output_string
     
@@ -169,7 +168,7 @@ def encode_file_id(s: bytes) -> str:
     return base64.urlsafe_b64encode(r).decode().rstrip("=")
     
 def unpack_new_file_id(new_file_id):
-    """Return file_id"""
+    """Return file_id - always returns a single string now"""
     decoded = FileId.decode(new_file_id)
     file_id = encode_file_id(
         pack(
@@ -181,5 +180,3 @@ def unpack_new_file_id(new_file_id):
         )
     )
     return file_id
-    
-
