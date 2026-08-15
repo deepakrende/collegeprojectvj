@@ -249,7 +249,8 @@ async def start(client, message):
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)
-            except:
+            except Exception as e:
+                print(f"BATCH send error: [e]")
                 continue
             await asyncio.sleep(1) 
         await sts.delete()
@@ -603,7 +604,7 @@ async def delete(bot, message):
         await msg.edit('This is not supported file format')
         return
     
-    file_id, file_ref = unpack_new_file_id(media.file_id)
+    file_id = unpack_new_file_id(media.file_id)
 
     result = col.delete_one({
         'file_id': file_id,
