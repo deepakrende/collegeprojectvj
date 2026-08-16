@@ -16,6 +16,7 @@ from TechVJ.util.file_properties import get_file_ids, get_hash, get_name
 from TechVJ.server.exceptions import InvalidHash, FIleNotFound
 from database.ia_filterdb import col, sec_col, MULTIPLE_DATABASE
 from TechVJ.util.link_utils import make_link
+from database.connections_mdb import increment_video_view, get_video_stats
 
 QUALITIES = ["360p", "480p", "720p", "1080p", "1440p", "2160p"]
 QUALITY_RE = re.compile(r"(?<!\d)(360p|480p|720p|1080p|1440p|2160p)(?!\d)", re.I)
@@ -141,6 +142,10 @@ async def render_page(id, secure_hash, expires=None, signature=None, quality=Non
         raise InvalidHash
 
     current_name = file_data.file_name or ""
+    # Count one view when the watch page is successfully opened.
+    stats = await get_video_stats(id)
+    await increment_video_view(id)
+    stats["views"] = int(stats.get("views", 0)) + 1
     selected_quality = str(quality or "").lower()
 
     if selected_quality:
@@ -220,5 +225,8 @@ async def render_page(id, secure_hash, expires=None, signature=None, quality=Non
         quality_options=quality_options,
         link_expires=int(expires),
         selected_quality=current_quality,
+        file_id=id,
+        total_views=int(stats.get("views", 0)),
+        total_downloads=int(stats.get("downloads", 0)),
         quality_query=quality_query,
     )
