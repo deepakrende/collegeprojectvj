@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import re, math, logging, secrets, mimetypes, time
+import re, math, logging, secrets, mimetypes, time, json
 from info import *
 from aiohttp import web
 from aiohttp.http_exceptions import BadStatusLine
@@ -13,6 +13,7 @@ from TechVJ.util.custom_dl import ByteStreamer
 from TechVJ.util.time_format import get_readable_time
 from TechVJ.util.render_template import render_page
 from TechVJ.util.link_utils import validate_link
+from database.connections_mdb import increment_video_download
 
 routes = web.RouteTableDef()
 
@@ -99,6 +100,62 @@ async def stream_handler(request: web.Request):
     except Exception as e:
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
+
+
+# In-memory active viewer registry: {video_id: {viewer_id: last_seen_monotonic}}
+_ACTIVE_VIEWERS = {}
+_VIEWER_TTL = 35
+
+def _viewer_count(video_id):
+    now = time.monotonic()
+    viewers = _ACTIVE_VIEWERS.setdefault(int(video_id), {})
+    stale = [k for k, v in viewers.items() if now - v > _VIEWER_TTL]
+    for k in stale:
+        viewers.pop(k, None)
+    if not viewers:
+        _ACTIVE_VIEWERS.pop(int(video_id), None)
+        return 0
+    return len(viewers)
+
+
+@routes.get(r"/api/viewers/{file_id}")
+async def viewer_count_handler(request: web.Request):
+    try:
+        file_id = int(request.match_info["file_id"])
+        return web.json_response({"viewers": _viewer_count(file_id)})
+    except (TypeError, ValueError):
+        raise web.HTTPBadRequest(text="Invalid file ID")
+
+
+@routes.post(r"/api/viewers/{file_id}")
+async def viewer_heartbeat_handler(request: web.Request):
+    try:
+        file_id = int(request.match_info["file_id"])
+        data = await request.json()
+        viewer_id = str(data.get("viewer_id", "")).strip()
+        active = bool(data.get("active", False))
+        if not viewer_id or len(viewer_id) > 128:
+            raise web.HTTPBadRequest(text="Invalid viewer ID")
+        viewers = _ACTIVE_VIEWERS.setdefault(file_id, {})
+        if active:
+            viewers[viewer_id] = time.monotonic()
+        else:
+            viewers.pop(viewer_id, None)
+        return web.json_response({"viewers": _viewer_count(file_id)})
+    except json.JSONDecodeError:
+        raise web.HTTPBadRequest(text="Invalid JSON")
+    except (TypeError, ValueError):
+        raise web.HTTPBadRequest(text="Invalid file ID")
+
+
+@routes.post(r"/api/download/{file_id}")
+async def download_count_handler(request: web.Request):
+    try:
+        file_id = int(request.match_info["file_id"])
+        count = await increment_video_download(file_id)
+        return web.json_response({"downloads": count})
+    except (TypeError, ValueError):
+        raise web.HTTPBadRequest(text="Invalid file ID")
 
 
 class_cache = {}
