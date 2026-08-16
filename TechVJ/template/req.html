@@ -362,42 +362,6 @@
         .report-link:hover { color: #f5aaaa; border-color: rgba(255,128,128,0.3); }
 
 
-
-        /* ─── LIVE VIEWERS ─── */
-        .viewer-bar {
-            max-width: 900px;
-            margin: 10px auto 0;
-            padding: 0 14px;
-        }
-        .viewer-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 7px 13px;
-            border-radius: 50px;
-            background: rgba(255,92,92,0.07);
-            border: 1px solid rgba(255,92,92,0.18);
-            color: var(--muted2);
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: all 0.25s ease;
-        }
-        .viewer-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--red);
-            box-shadow: 0 0 0 0 rgba(255,92,92,0.55);
-            animation: viewerPulse 1.7s infinite;
-        }
-        .viewer-count { color: #ffb1b1; font-weight: 800; }
-        .viewer-label { color: var(--muted2); }
-        @keyframes viewerPulse {
-            0% { box-shadow: 0 0 0 0 rgba(255,92,92,0.55); }
-            70% { box-shadow: 0 0 0 7px rgba(255,92,92,0); }
-            100% { box-shadow: 0 0 0 0 rgba(255,92,92,0); }
-        }
-
         /* ─── EXTERNAL PLAYERS ─── */
         .ext-section {
             max-width: 900px;
@@ -674,6 +638,36 @@
             text-decoration: none;
         }
 
+        /* ─── VIDEO STATS ─── */
+        .video-stats {
+            max-width: 900px;
+            margin: 10px auto 0;
+            padding: 0 14px;
+        }
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(17,17,32,0.72);
+            color: var(--muted2);
+            font-size: 0.76rem;
+        }
+        .stat { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .stat strong { color: var(--text); font-weight: 700; }
+        .live-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 0 4px rgba(255,92,92,0.10), 0 0 12px rgba(255,92,92,0.5);
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+        .stat-sep { width: 1px; height: 15px; background: var(--border2); }
+        @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
+
         /* ─── ANIMATIONS ─── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(22px); }
@@ -735,11 +729,15 @@
         </div>
     </div>
 </div>
-<div class="viewer-bar au d3" aria-live="polite">
-    <div class="viewer-pill" id="viewerPill" title="People currently watching this video">
-        <span class="viewer-dot" aria-hidden="true"></span>
-        <span class="viewer-count" id="viewerCount">0</span>
-        <span class="viewer-label" id="viewerLabel">Watching now</span>
+
+<!-- ─── VIDEO STATS ─── -->
+<div class="video-stats au d3" aria-live="polite">
+    <div class="stats-bar">
+        <span class="stat"><span class="live-dot"></span><strong id="liveViewers">0</strong> Watching Now</span>
+        <span class="stat-sep"></span>
+        <span class="stat">👁 <strong id="totalViews">{{ total_views|default(0) }}</strong> Views</span>
+        <span class="stat-sep"></span>
+        <span class="stat">📥 <strong id="totalDownloads">{{ total_downloads|default(0) }}</strong> Downloads</span>
     </div>
 </div>
 
@@ -890,7 +888,19 @@
     window.s_player      = function () { window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end'; };
     window.km_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end'; };
     window.hd_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end'; };
-    window.Download      = function () { window.location.href = Link; };
+    window.Download      = function () {
+        var downloadUrl = '/api/download/' + encodeURIComponent('{{ file_id|default(0) }}');
+        fetch(downloadUrl, { method: 'POST', keepalive: true })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (data && typeof data.downloads === 'number') {
+                    var el = document.getElementById('totalDownloads');
+                    if (el) el.textContent = data.downloads.toLocaleString();
+                }
+            })
+            .catch(function () {})
+            .finally(function () { window.location.href = Link; });
+    };
 
     // ── Storage key from file URL (stable per video)
     var STORAGE_KEY = 'tcu:' + Link;
@@ -945,81 +955,6 @@
     var videoEl  = document.getElementById('player');
     var seekL    = document.getElementById('seekLeft');
     var seekR    = document.getElementById('seekRight');
-    var viewerCountEl = document.getElementById('viewerCount');
-    var viewerLabelEl = document.getElementById('viewerLabel');
-    var VIDEO_ID = {{ video_id|tojson }};
-    var VIEWER_API = '/api/viewers/' + encodeURIComponent(VIDEO_ID);
-    var VIEWER_TTL_MS = 35000;
-    var viewerHeartbeat = null;
-    var viewerActive = false;
-    var viewerId = null;
-
-    try {
-        viewerId = sessionStorage.getItem('tcu_viewer_id');
-        if (!viewerId) {
-            viewerId = (window.crypto && crypto.randomUUID)
-                ? crypto.randomUUID()
-                : 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-            sessionStorage.setItem('tcu_viewer_id', viewerId);
-        }
-    } catch (e) {
-        viewerId = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-    }
-
-    function updateViewerCount(count) {
-        count = Math.max(0, parseInt(count, 10) || 0);
-        if (viewerCountEl) viewerCountEl.textContent = count.toLocaleString();
-        if (viewerLabelEl) viewerLabelEl.textContent = count === 1 ? 'Watching now' : 'Watching now';
-    }
-
-    async function viewerRequest(action, keepalive) {
-        try {
-            var response = await fetch(VIEWER_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ viewer_id: viewerId, action: action }),
-                keepalive: !!keepalive,
-                cache: 'no-store'
-            });
-            if (response.ok) {
-                var data = await response.json();
-                updateViewerCount(data.viewers);
-            }
-        } catch (e) {}
-    }
-
-    async function fetchViewerCount() {
-        try {
-            var response = await fetch(VIEWER_API, { cache: 'no-store' });
-            if (response.ok) {
-                var data = await response.json();
-                updateViewerCount(data.viewers);
-            }
-        } catch (e) {}
-    }
-
-    function startViewerTracking() {
-        if (viewerActive) {
-            viewerRequest('heartbeat', false);
-            return;
-        }
-        viewerActive = true;
-        viewerRequest('heartbeat', false);
-        clearInterval(viewerHeartbeat);
-        viewerHeartbeat = setInterval(function () {
-            if (viewerActive && !videoEl.paused && !videoEl.ended) {
-                viewerRequest('heartbeat', false);
-            }
-        }, 12000);
-    }
-
-    function stopViewerTracking() {
-        if (!viewerActive) return;
-        viewerActive = false;
-        clearInterval(viewerHeartbeat);
-        viewerHeartbeat = null;
-        viewerRequest('stop', true);
-    }
 
     document.addEventListener('DOMContentLoaded', function () {
         var player = new Plyr('#player', {
@@ -1033,6 +968,68 @@
         var prefs = loadJSON(PREF_KEY, { vol: 1, muted: false, speed: 1 });
         var state = loadJSON(STORAGE_KEY, null);
 
+        // ── Live viewer heartbeat
+        var VIEWER_ID_KEY = 'tcu:viewer-id';
+        var viewerId = loadJSON(VIEWER_ID_KEY, null);
+        if (!viewerId) {
+            viewerId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() :
+                ('v_' + Date.now() + '_' + Math.random().toString(36).slice(2));
+            saveJSON(VIEWER_ID_KEY, viewerId);
+        }
+        var viewerActive = false;
+        var viewerTimer = null;
+        var viewerEndpoint = '/api/viewers/{{ file_id|default(0) }}';
+
+        function updateViewerCount() {
+            fetch(viewerEndpoint, { cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var el = document.getElementById('liveViewers');
+                    if (el && typeof data.viewers === 'number') el.textContent = data.viewers.toLocaleString();
+                }).catch(function () {});
+        }
+
+        function sendViewerHeartbeat(active) {
+            viewerActive = active;
+            fetch(viewerEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ viewer_id: viewerId, active: active }),
+                keepalive: true
+            }).then(function (r) { return r.json(); })
+              .then(function (data) {
+                  var el = document.getElementById('liveViewers');
+                  if (el && typeof data.viewers === 'number') el.textContent = data.viewers.toLocaleString();
+              }).catch(function () {});
+        }
+
+        function startViewerHeartbeat() {
+            if (!viewerTimer) {
+                sendViewerHeartbeat(true);
+                viewerTimer = setInterval(function () {
+                    if (!document.hidden && !videoEl.paused && !videoEl.ended) sendViewerHeartbeat(true);
+                    else if (viewerActive && videoEl.paused) sendViewerHeartbeat(false);
+                }, 15000);
+            }
+        }
+
+        function stopViewerHeartbeat() {
+            if (viewerActive) sendViewerHeartbeat(false);
+        }
+
+        videoEl.addEventListener('play', startViewerHeartbeat);
+        videoEl.addEventListener('playing', startViewerHeartbeat);
+        videoEl.addEventListener('pause', stopViewerHeartbeat);
+        videoEl.addEventListener('ended', stopViewerHeartbeat);
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) stopViewerHeartbeat();
+            else if (!videoEl.paused && !videoEl.ended) startViewerHeartbeat();
+            updateViewerCount();
+        });
+        window.addEventListener('beforeunload', stopViewerHeartbeat);
+        updateViewerCount();
+        setInterval(updateViewerCount, 15000);
+
         // Apply saved volume / speed
         player.on('ready', function () {
             if (typeof prefs.vol === 'number') player.volume = prefs.vol;
@@ -1045,16 +1042,6 @@
         videoEl.addEventListener('canplay',     function () { shell.classList.remove('is-loading'); });
         videoEl.addEventListener('waiting',     function () { shell.classList.add('is-loading'); });
         videoEl.addEventListener('playing',     function () { shell.classList.remove('is-loading'); });
-
-        // ── Live viewer counter: count only while this video is playing
-        videoEl.addEventListener('play', startViewerTracking);
-        videoEl.addEventListener('playing', startViewerTracking);
-        videoEl.addEventListener('pause', stopViewerTracking);
-        videoEl.addEventListener('ended', stopViewerTracking);
-        videoEl.addEventListener('emptied', stopViewerTracking);
-        fetchViewerCount();
-        window.addEventListener('pagehide', function () { stopViewerTracking(); });
-        window.addEventListener('beforeunload', function () { stopViewerTracking(); });
 
         // Resume playback
         videoEl.addEventListener('loadedmetadata', function () {
