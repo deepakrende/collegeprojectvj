@@ -12,65 +12,29 @@ from TechVJ import StartTime, __version__
 from TechVJ.util.custom_dl import ByteStreamer
 from TechVJ.util.time_format import get_readable_time
 from TechVJ.util.render_template import render_page
-from database.connections_mdb import increment_video_download
+from TechVJ.util.link_utils import validate_link
 
 routes = web.RouteTableDef()
 
-# Active viewers: {video_id: {viewer_id: last_heartbeat_timestamp}}
-ACTIVE_VIEWERS = {}
-VIEWER_TIMEOUT = 45
 
-@routes.post(r"/api/viewers/{video_id:\d+}")
-async def viewer_heartbeat(request: web.Request):
-    video_id = int(request.match_info["video_id"])
-    try:
-        data = await request.json()
-    except Exception:
-        data = {}
-    viewer_id = str(data.get("viewer_id", "")).strip()
-    active = bool(data.get("active", True))
-    if not viewer_id or len(viewer_id) > 128:
-        raise web.HTTPBadRequest(text="viewer_id is required")
+def _link_is_valid(request, message_id, secure_hash, quality=""):
+    expires = request.rel_url.query.get("exp")
+    signature = request.rel_url.query.get("sig")
+    return validate_link(message_id, secure_hash, expires, signature, quality)
 
-    now = time.time()
-    viewers = ACTIVE_VIEWERS.setdefault(video_id, {})
-    # Remove stale viewers for this video.
-    stale = [k for k, last in viewers.items() if now - last > VIEWER_TIMEOUT]
-    for k in stale:
-        viewers.pop(k, None)
 
-    if active:
-        viewers[viewer_id] = now
-    else:
-        viewers.pop(viewer_id, None)
+def _expired_response():
+    return web.Response(
+        status=410,
+        text="This link has expired. Please generate a new link.",
+        content_type="text/plain",
+    )
 
-    # Avoid unbounded growth if old video IDs accumulate.
-    if not viewers:
-        ACTIVE_VIEWERS.pop(video_id, None)
-
-    return web.json_response({"viewers": len(viewers)})
-
-@routes.get(r"/api/viewers/{video_id:\d+}")
-async def viewer_count(request: web.Request):
-    video_id = int(request.match_info["video_id"])
-    now = time.time()
-    viewers = ACTIVE_VIEWERS.get(video_id, {})
-    for k in list(viewers):
-        if now - viewers[k] > VIEWER_TIMEOUT:
-            viewers.pop(k, None)
-    if not viewers:
-        ACTIVE_VIEWERS.pop(video_id, None)
-    return web.json_response({"viewers": len(viewers)})
-
-@routes.post(r"/api/download/{video_id:\d+}")
-async def download_counter(request: web.Request):
-    video_id = int(request.match_info["video_id"])
-    count = await increment_video_download(video_id)
-    return web.json_response({"downloads": count})
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
     return web.json_response("BenFilterBot")
+
 
 @routes.get(r"/watch/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
@@ -81,9 +45,23 @@ async def stream_handler(request: web.Request):
             secure_hash = match.group(1)
             id = int(match.group(2))
         else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
+            id = int(re.search(r"(\d+)(?:/\S+)?", path).group(1))
             secure_hash = request.rel_url.query.get("hash")
-        return web.Response(text=await render_page(id, secure_hash), content_type='text/html')
+
+        quality = request.rel_url.query.get("quality", "").lower()
+        if not _link_is_valid(request, id, secure_hash, quality):
+            return _expired_response()
+
+        return web.Response(
+            text=await render_page(
+                id,
+                secure_hash,
+                request.rel_url.query.get("exp"),
+                request.rel_url.query.get("sig"),
+                quality,
+            ),
+            content_type="text/html",
+        )
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
@@ -94,6 +72,7 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
+
 @routes.get(r"/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
     try:
@@ -103,8 +82,13 @@ async def stream_handler(request: web.Request):
             secure_hash = match.group(1)
             id = int(match.group(2))
         else:
-            id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
+            id = int(re.search(r"(\d+)(?:/\S+)?", path).group(1))
             secure_hash = request.rel_url.query.get("hash")
+
+        quality = request.rel_url.query.get("quality", "").lower()
+        if not _link_is_valid(request, id, secure_hash, quality):
+            return _expired_response()
+
         return await media_streamer(request, id, secure_hash)
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
@@ -116,14 +100,16 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
+
 class_cache = {}
+
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
     range_header = request.headers.get("Range", 0)
-    
+
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
-    
+
     if MULTI_CLIENT:
         logging.info(f"Client {index} is now serving {request.remote}")
 
@@ -137,11 +123,11 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     logging.debug("before calling get_file_properties")
     file_id = await tg_connect.get_file_properties(id)
     logging.debug("after calling get_file_properties")
-    
+
     if file_id.unique_id[:6] != secure_hash:
         logging.debug(f"Invalid hash for message with ID {id}")
         raise InvalidHash
-    
+
     file_size = file_id.file_size
 
     if range_header:
