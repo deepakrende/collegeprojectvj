@@ -15,6 +15,7 @@ from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
+from TechVJ.util.link_utils import make_stream_links
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
@@ -143,8 +144,7 @@ async def auto_approve(client, message: ChatJoinRequest):
                 if STREAM_MODE == True:
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=msg.get("file_id"))
                     fileName = {quote_plus(get_name(log_msg))}
-                    stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-                    download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+                    stream, download = make_stream_links(log_msg.id, quote_plus(get_name(log_msg)), get_hash(log_msg))
 
                 if STREAM_MODE == True:
                     button = [[
@@ -215,8 +215,7 @@ async def auto_approve(client, message: ChatJoinRequest):
                 if STREAM_MODE == True:
                     log_msg = await client.send_cached_media(chat_id=LOG_CHANNEL, file_id=file_id)
                     fileName = {quote_plus(get_name(log_msg))}
-                    stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-                    download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
+                    stream, download = make_stream_links(log_msg.id, quote_plus(get_name(log_msg)), get_hash(log_msg))
  
                 if STREAM_MODE == True:
                     button = [[
