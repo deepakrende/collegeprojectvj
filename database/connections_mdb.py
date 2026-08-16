@@ -135,3 +135,34 @@ async def delete_connection(user_id, group_id):
         return False
 
 
+
+
+# ── Video statistics ───────────────────────────────────────────────
+stats_col = mydb['VIDEO_STATS']
+
+def _stats_doc(file_id):
+    return {"_id": int(file_id), "views": 0, "downloads": 0, "updated_at": 0}
+
+async def increment_video_view(file_id):
+    result = stats_col.find_one_and_update(
+        {"_id": int(file_id)},
+        {"$inc": {"views": 1}, "$set": {"updated_at": __import__('time').time()}},
+        upsert=True,
+        return_document=pymongo.ReturnDocument.AFTER,
+    )
+    return int(result.get("views", 0))
+
+async def increment_video_download(file_id):
+    result = stats_col.find_one_and_update(
+        {"_id": int(file_id)},
+        {"$inc": {"downloads": 1}, "$set": {"updated_at": __import__('time').time()}},
+        upsert=True,
+        return_document=pymongo.ReturnDocument.AFTER,
+    )
+    return int(result.get("downloads", 0))
+
+async def get_video_stats(file_id):
+    result = stats_col.find_one({"_id": int(file_id)}, {"views": 1, "downloads": 1})
+    if not result:
+        return {"views": 0, "downloads": 0}
+    return {"views": int(result.get("views", 0)), "downloads": int(result.get("downloads", 0))}
