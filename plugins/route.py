@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import re, math, logging, secrets, mimetypes, time
+import re, math, logging, secrets, mimetypes, time, asyncio
 from info import *
 from aiohttp import web
 from aiohttp.http_exceptions import BadStatusLine
@@ -14,6 +14,78 @@ from TechVJ.util.time_format import get_readable_time
 from TechVJ.util.render_template import render_page
 
 routes = web.RouteTableDef()
+
+# ── Live viewer tracking ─────────────────────────────────────────────────────
+# Tracks active browser sessions per Telegram file/message ID.
+# A viewer is considered active while the browser sends heartbeats.
+VIEWER_TTL = 35
+_viewers = {}
+_viewers_lock = asyncio.Lock()
+
+async def _cleanup_viewers(now=None):
+    now = now or time.monotonic()
+    async with _viewers_lock:
+        expired = []
+        for video_id, viewers in list(_viewers.items()):
+            dead = [viewer_id for viewer_id, last_seen in viewers.items()
+                    if now - last_seen > VIEWER_TTL]
+            for viewer_id in dead:
+                viewers.pop(viewer_id, None)
+            if not viewers:
+                expired.append(video_id)
+        for video_id in expired:
+            _viewers.pop(video_id, None)
+
+@routes.post('/api/viewers/{video_id}')
+async def viewer_presence(request: web.Request):
+    try:
+        video_id = int(request.match_info['video_id'])
+        data = await request.json()
+        viewer_id = str(data.get('viewer_id', '')).strip()
+        action = str(data.get('action', 'heartbeat')).lower()
+
+        if not viewer_id or len(viewer_id) > 128:
+            raise web.HTTPBadRequest(text='Invalid viewer ID')
+        if action not in {'heartbeat', 'stop'}:
+            raise web.HTTPBadRequest(text='Invalid viewer action')
+
+        now = time.monotonic()
+        async with _viewers_lock:
+            viewers = _viewers.setdefault(video_id, {})
+            if action == 'stop':
+                viewers.pop(viewer_id, None)
+            else:
+                viewers[viewer_id] = now
+
+            count = len(viewers)
+            if count == 0:
+                _viewers.pop(video_id, None)
+
+        # Remove stale viewers without blocking the response.
+        await _cleanup_viewers(now)
+
+        async with _viewers_lock:
+            count = len(_viewers.get(video_id, {}))
+        return web.json_response({'viewers': count})
+    except web.HTTPException:
+        raise
+    except (ValueError, TypeError):
+        raise web.HTTPBadRequest(text='Invalid video ID')
+    except Exception as e:
+        logging.exception('Viewer presence error')
+        raise web.HTTPInternalServerError(text='Viewer service unavailable')
+
+@routes.get('/api/viewers/{video_id}')
+async def viewer_count(request: web.Request):
+    try:
+        video_id = int(request.match_info['video_id'])
+        await _cleanup_viewers()
+        async with _viewers_lock:
+            count = len(_viewers.get(video_id, {}))
+        return web.json_response({'viewers': count})
+    except (ValueError, TypeError):
+        raise web.HTTPBadRequest(text='Invalid video ID')
+
 
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
@@ -147,4 +219,3 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Accept-Ranges": "bytes",
         },
     )
-
