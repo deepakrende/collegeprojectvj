@@ -8,6 +8,7 @@ from TechVJ.bot import TechVJBot
 from TechVJ.util.human_readable import humanbytes
 from TechVJ.util.file_properties import get_file_ids
 from TechVJ.server.exceptions import InvalidHash
+from database.connections_mdb import increment_video_view, get_video_stats
 import urllib.parse
 import logging
 import aiohttp
@@ -41,10 +42,16 @@ async def render_page(id, secure_hash, src=None):
 
     file_name = file_data.file_name.replace("_", " ")
 
+    # Count one page/watch-link visit as a view.
+    await increment_video_view(id)
+    stats = await get_video_stats(id)
+
     return template.render(
         file_name=file_name,
         file_url=src,
         file_size=file_size,
         file_unique_id=file_data.unique_id,
-        video_id=int(id),
+        file_id=id,
+        total_views=stats["views"],
+        total_downloads=stats["downloads"],
     )
