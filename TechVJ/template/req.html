@@ -362,98 +362,70 @@
         .report-link:hover { color: #f5aaaa; border-color: rgba(255,128,128,0.3); }
 
 
-        /* ─── EXTERNAL PLAYERS ─── */
-        .ext-section {
+        /* ─── BUSINESS SPOTLIGHT ─── */
+        .biz-section {
             max-width: 900px;
             margin: 22px auto 0;
             padding: 0 14px;
         }
-
-        .sec-head {
-            font-size: 0.67rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .biz-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 1px solid rgba(124,111,255,0.20);
+            background: linear-gradient(135deg, rgba(24,23,48,0.96), rgba(13,14,29,0.96));
+            box-shadow: 0 18px 48px rgba(0,0,0,0.28);
+            min-height: 190px;
         }
-
-        .sec-head::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
+        .biz-card::before {
+            content: ''; position: absolute; width: 220px; height: 220px;
+            top: -130px; right: -60px; border-radius: 50%;
+            background: rgba(124,111,255,0.16); filter: blur(18px); pointer-events:none;
         }
-
-        .player-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+        .biz-card::after {
+            content: ''; position: absolute; width: 180px; height: 180px;
+            bottom: -130px; left: -70px; border-radius: 50%;
+            background: rgba(0,224,176,0.07); filter: blur(22px); pointer-events:none;
         }
-
-        @media (min-width: 500px) { .player-grid { grid-template-columns: repeat(6, 1fr); } }
-
-        .pcell {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 15px 8px 11px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
-            user-select: none;
+        .biz-slide {
+            display: none; position: relative; z-index: 1;
+            padding: 22px 22px 18px; animation: bizFade .45s ease;
         }
-
-        .pcell:hover {
-            background: rgba(124,111,255,0.1);
-            border-color: rgba(124,111,255,0.32);
-            transform: translateY(-5px);
-            box-shadow: 0 14px 32px rgba(0,0,0,0.45), 0 0 20px rgba(124,111,255,0.1);
+        .biz-slide.active { display: block; }
+        @keyframes bizFade { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+        .biz-kicker {
+            display:flex; align-items:center; gap:8px;
+            font-size:.64rem; font-weight:800; letter-spacing:1.8px;
+            text-transform:uppercase; color:#aaa2ff; margin-bottom:7px;
         }
-
-        .pcell:active { transform: translateY(-2px) scale(0.96); }
-
-        .pname {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--muted2);
-            letter-spacing: 0.2px;
-            text-align: center;
+        .biz-kicker-dot { width:7px; height:7px; border-radius:50%; background:#8b7fff; box-shadow:0 0 12px rgba(139,127,255,.75); }
+        .biz-title { font-family:var(--font-h); font-size:1.18rem; font-weight:800; color:#fff; margin:0 0 5px; }
+        .biz-desc { font-size:.78rem; line-height:1.5; color:var(--muted2); max-width:620px; margin:0 0 14px; }
+        .biz-products { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
+        .biz-product {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:7px 10px 7px 7px; border-radius:11px;
+            background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
+            color:#e9e7f5; font-size:.68rem; font-weight:650;
         }
-
-        .pcell:hover .pname { color: #c0b8ff; }
-
-        .dl-btn {
-            width: 100%;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px;
-            border-radius: 14px;
-            background: rgba(0,224,176,0.08);
-            border: 1px solid rgba(0,224,176,0.22);
-            color: var(--accent2);
-            font-family: var(--font-h);
-            font-weight: 700;
-            font-size: 0.88rem;
-            cursor: pointer;
-            transition: all 0.22s ease;
-            letter-spacing: 0.3px;
+        .biz-logo { width:23px; height:23px; border-radius:7px; object-fit:contain; background:rgba(255,255,255,.08); padding:4px; }
+        .biz-cta {
+            display:inline-flex; align-items:center; gap:7px;
+            padding:9px 14px; border-radius:10px;
+            background:rgba(124,111,255,.16); border:1px solid rgba(124,111,255,.32);
+            color:#e5e1ff; text-decoration:none; font-size:.72rem; font-weight:750;
+            transition:.2s ease;
         }
-
-        .dl-btn:hover {
-            background: rgba(0,224,176,0.16);
-            border-color: rgba(0,224,176,0.42);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,224,176,0.14);
+        .biz-cta:hover { background:rgba(124,111,255,.25); transform:translateY(-1px); }
+        .biz-dots { position:absolute; z-index:2; right:18px; bottom:16px; display:flex; gap:6px; }
+        .biz-dot { width:6px; height:6px; border:0; padding:0; border-radius:50%; background:rgba(255,255,255,.22); cursor:pointer; transition:.2s; }
+        .biz-dot.active { width:18px; border-radius:5px; background:#8b7fff; }
+        @media (max-width:520px) {
+            .biz-card { min-height:210px; }
+            .biz-slide { padding:20px 16px 18px; }
+            .biz-products { gap:6px; }
+            .biz-product { font-size:.64rem; }
+            .biz-dots { right:16px; bottom:14px; }
         }
 
         /* ─── NOTICE ─── */
@@ -668,63 +640,6 @@
         .stat-sep { width: 1px; height: 15px; background: var(--border2); }
         @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.45; } }
 
-
-        /* ─── QUALITY SELECTOR ─── */
-        .quality-area {
-            max-width: 900px;
-            margin: 12px auto 0;
-            padding: 0 14px;
-        }
-        .quality-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            padding: 12px 14px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: rgba(17,17,32,0.72);
-        }
-        .quality-label {
-            color: var(--muted2);
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: .5px;
-            margin-right: 2px;
-        }
-        .quality-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 58px;
-            padding: 8px 12px;
-            border-radius: 9px;
-            border: 1px solid var(--border2);
-            background: rgba(255,255,255,0.04);
-            color: var(--muted2);
-            text-decoration: none;
-            font-size: .75rem;
-            font-weight: 700;
-            transition: all .2s ease;
-        }
-        .quality-btn:hover {
-            color: #fff;
-            border-color: rgba(124,111,255,.5);
-            background: rgba(124,111,255,.12);
-            transform: translateY(-1px);
-        }
-        .quality-btn.active {
-            color: #fff;
-            background: rgba(124,111,255,.22);
-            border-color: rgba(124,111,255,.7);
-            box-shadow: 0 0 16px rgba(124,111,255,.12);
-        }
-        @media (max-width: 520px) {
-            .quality-box { justify-content: center; }
-            .quality-label { width: 100%; text-align: center; margin-bottom: 2px; }
-            .quality-btn { flex: 1 1 70px; }
-        }
-
         /* ─── ANIMATIONS ─── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(22px); }
@@ -787,19 +702,6 @@
     </div>
 </div>
 
-
-<!-- ─── QUALITY SELECTOR ─── -->
-{% if quality_options %}
-<div class="quality-area au d3">
-    <div class="quality-box">
-        <span class="quality-label">QUALITY</span>
-        {% for option in quality_options %}
-        <a class="quality-btn{% if option.active %} active{% endif %}" href="{{ option.url }}"{% if option.active %} aria-current="page"{% endif %}>{{ option.label }}</a>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-
 <!-- ─── VIDEO STATS ─── -->
 <div class="video-stats au d3" aria-live="polite">
     <div class="stats-bar">
@@ -811,71 +713,53 @@
     </div>
 </div>
 
-<!-- ─── EXTERNAL PLAYERS ─── -->
-<div class="ext-section au d4">
-    <div class="sec-head">Open with external player</div>
-    <div class="player-grid">
-
-
-        <div class="pcell" onclick="vlc_player()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
-                <defs><linearGradient id="vg1" x1="32" x2="32" y1="16" y2="40" gradientUnits="userSpaceOnUse"><stop offset=".4" stop-color="#6dc7ff"/><stop offset="1" stop-color="#e6abff"/></linearGradient><linearGradient id="vg2" x1="32" x2="32" y1="7" y2="56" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1a6dff"/><stop offset="1" stop-color="#c822ff"/></linearGradient></defs>
-                <path fill="url(#vg1)" d="M32,31.25c2.891,0,5.255-.323,6.939-.712l2.409,7.664C37.765,39.116,33.881,39.25,32,39.25c-1.88,0-5.765-.134-9.347-1.049l2.408-7.663C26.745,30.927,29.11,31.25,32,31.25z M32.5,24.25c1.554,0,2.999-.141,4.343-.38l-2.429-7.729c-.587.063-1.211.109-1.914.109-1.1,0-2.062-.092-2.876-.229l-2.404,7.651C28.816,24.034,30.574,24.25,32.5,24.25z"/>
-                <path fill="url(#vg2)" d="M56.903,50.041l-2.216-10.779c-.513-2.265-2.52-3.847-4.881-3.847H45.09l-8.059-24.451c-.7-2.123-2.726-3.549-5.04-3.549-2.314,0-4.339,1.426-5.039,3.549L18.934,35.415h-4.491c-2.362,0-4.369,1.582-4.885,3.866L7.31,50.021c-.327,1.442.019,2.937.947,4.099C9.212,55.314,10.645,56,12.19,56h39.828c1.545,0,2.979-.685,3.934-1.88C56.88,52.958,57.226,51.464,56.903,50.041z"/>
-            </svg>
-            <span class="pname">VLC</span>
+<!-- ─── BUSINESS SPOTLIGHT ─── -->
+<div class="biz-section au d4" aria-label="Featured digital services">
+    <div class="biz-card" id="businessSpotlight">
+        <div class="biz-slide active">
+            <div class="biz-kicker"><span class="biz-kicker-dot"></span> Premium Digital Services</div>
+            <div class="biz-title">One place for the tools you use.</div>
+            <p class="biz-desc">AI tools, premium software, entertainment and productivity services — curated in one place.</p>
+            <div class="biz-products">
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/gamma/ffffff" alt="Gamma">Gamma</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/pictory/ffffff" alt="Pictory">Pictory</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/elevenlabs/ffffff" alt="ElevenLabs">ElevenLabs</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/googlegemini/ffffff" alt="Gemini">Gemini</span>
+            </div>
+            <a class="biz-cta" href="{{ business_url|default('https://t.me/YourBusiness') }}" target="_blank" rel="noopener">Explore Services <span>→</span></a>
         </div>
 
-        <div class="pcell" onclick="mx_player()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="28" fill="#ffeb9b"/><circle cx="32" cy="32" r="21" fill="#f9dd8f"/>
-                <path fill="#8d6c9f" d="M32,6c14.336,0,26,11.664,26,26S46.336,58,32,58S6,46.336,6,32S17.664,6,32,6M32,4C16.536,4,4,16.536,4,32s12.536,28,28,28s28-12.536,28-28S47.464,4,32,4z"/>
-                <path fill="#fff8ee" d="M42.5,31.134l-17-9.815c-.667-.385-1.5.096-1.5.866v19.63c0,.77.833,1.251,1.5.866l17-9.815C43.167,32.481,43.167,31.519,42.5,31.134z"/>
-            </svg>
-            <span class="pname">MX Player</span>
+        <div class="biz-slide">
+            <div class="biz-kicker"><span class="biz-kicker-dot"></span> Premium Software</div>
+            <div class="biz-title">Tools for creators & professionals.</div>
+            <p class="biz-desc">Professional software for development, design, websites and creative work.</p>
+            <div class="biz-products">
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/jetbrains/ffffff" alt="JetBrains">JetBrains</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/webflow/ffffff" alt="Webflow">Webflow</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/autodesk/ffffff" alt="Autodesk">Autodesk</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/filmora/ffffff" alt="Filmora">Filmora</span>
+            </div>
+            <a class="biz-cta" href="{{ business_url|default('https://t.me/YourBusiness') }}" target="_blank" rel="noopener">Explore Software <span>→</span></a>
         </div>
 
-        <div class="pcell" onclick="playit_player()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 48 48">
-                <style>.pc2{fill:none;stroke:#22abbd;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5}</style>
-                <path class="pc2" d="m17,32.5v5c0,2.7614-2.2386,5-5,5h0c-2.7614,0-5-2.2386-5-5"/>
-                <path class="pc2" d="m7,37.5c0-2.7614,2.2386-5,5-5h25c2.2,0,4-1.8,4-4V9.5c0-2.2-1.8-4-4-4H11c-2.2,0-4,1.8-4,4v28"/>
-                <path class="pc2" d="m29.1876,18.467l-9.1448-5.2652c-.822-.4733-1.8482.12-1.8482,1.0685v10.5304c0,.9485,1.0262,1.5418,1.8482,1.0685l9.1448-5.2652c.8237-.4742.8237-1.6628,0-2.137Z"/>
-            </svg>
-            <span class="pname">Play-It</span>
+        <div class="biz-slide">
+            <div class="biz-kicker"><span class="biz-kicker-dot"></span> Entertainment</div>
+            <div class="biz-title">More ways to enjoy your screen time.</div>
+            <p class="biz-desc">Premium entertainment services for streaming, music and everyday viewing.</p>
+            <div class="biz-products">
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/netflix/ffffff" alt="Netflix">Netflix</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/primevideo/ffffff" alt="Prime Video">Prime Video</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/hotstar/ffffff" alt="JioHotstar">JioHotstar</span>
+                <span class="biz-product"><img class="biz-logo" src="https://cdn.simpleicons.org/zee5/ffffff" alt="ZEE5">ZEE5</span>
+            </div>
+            <a class="biz-cta" href="{{ business_url|default('https://t.me/YourBusiness') }}" target="_blank" rel="noopener">Explore Entertainment <span>→</span></a>
         </div>
 
-        <div class="pcell" onclick="km_player()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40">
-                <defs><linearGradient id="kg1" x1="76.124" x2="76.124" y1="12.7" y2="50.192" gradientTransform="matrix(-1 0 0 1 115.415 0)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1a6dff"/><stop offset="1" stop-color="#c822ff"/></linearGradient><linearGradient id="kg2" x1="23.708" x2="23.708" y1="13.698" y2="49.195" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6dc7ff"/><stop offset="1" stop-color="#e6abff"/></linearGradient></defs>
-                <path fill="url(#kg1)" d="M50.999,50.192c-.597,0-1.19-.179-1.702-.531L25.882,33.513c-.824-.568-1.31-1.505-1.298-2.506.013-1,.52-1.925,1.356-2.474l23.416-15.342c.923-.604,2.099-.655,3.07-.129C53.397,13.587,54,14.598,54,15.701v31.49c0,1.118-.615,2.136-1.605,2.656C51.955,50.078,51.476,50.192,50.999,50.192z"/>
-                <path fill="url(#kg2)" d="M10,15.701v31.49c0,1.612,1.809,2.561,3.135,1.646l23.416-16.149c1.169-.806,1.149-2.541-.039-3.319L13.096,14.028C11.766,13.157,10,14.111,10,15.701z"/>
-            </svg>
-            <span class="pname">KM Player</span>
+        <div class="biz-dots" aria-label="Promotion slides">
+            <button class="biz-dot active" type="button" aria-label="Slide 1"></button>
+            <button class="biz-dot" type="button" aria-label="Slide 2"></button>
+            <button class="biz-dot" type="button" aria-label="Slide 3"></button>
         </div>
-
-        <div class="pcell" onclick="s_player()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 64 64">
-                <defs><linearGradient id="sg1" x1="35.5" x2="35.5" y1="7" y2="57" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1a6dff"/><stop offset="1" stop-color="#c822ff"/></linearGradient><linearGradient id="sg2" x1="26" x2="26" y1="14" y2="49" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6dc7ff"/><stop offset="1" stop-color="#e6abff"/></linearGradient></defs>
-                <path fill="url(#sg1)" d="M56.7,30c-.95-.5-9.83-5.54-9.92-5.6L16.69,7.42c-.91-.51-1.89-.56-2.62-.13C13.39,7.69,13,8.44,13,9.34v45.57c0,.81.35,1.47.96,1.83.3.17.63.26.98.26.42,0,.86-.12,1.29-.37l40.43-22.81c1.18-.67,1.35-1.52,1.34-1.97C57.99,31.11,57.52,30.43,56.7,30z"/>
-                <path fill="url(#sg2)" d="M35.11,31.89L17,49.47V14.33L35.11,31.89z"/>
-            </svg>
-            <span class="pname">S Player</span>
-        </div>
-
-        <div class="pcell" onclick="hd_player()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 512 512">
-                <path style="fill:#e53935;" d="M256,0C114.6,0,0,114.6,0,256s114.6,256,256,256s256-114.6,256-256S397.4,0,256,0z"/>
-                <polygon style="fill:#fff;" points="188,147 188,356 383,251.5"/>
-            </svg>
-            <span class="pname">HD 4K</span>
-        </div>
-
-    </div>
-
-    <div class="dl-btn" onclick="Download()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-        Download File<span class="dl-size" id="dlSize"></span>
     </div>
 </div>
 
@@ -949,15 +833,9 @@
         if (fullTitle.length > 72) { div.textContent = fullTitle.slice(0, 72) + '…'; }
     }
 
-    // ── External player links
+    // ── Watch/download link
     var videolink = window.location.href;
     var Link = videolink.replace('/watch/', '/');
-    window.vlc_player    = function () { window.location.href = 'vlc://' + Link; };
-    window.mx_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=com.mxtech.videoplayer.ad;end'; };
-    window.playit_player = function () { window.location.href = 'playit://playerv2/video?url=' + Link; };
-    window.s_player      = function () { window.location.href = 'intent:' + Link + '#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end'; };
-    window.km_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=com.kmplayer;end'; };
-    window.hd_player     = function () { window.location.href = 'intent:' + Link + '#Intent;package=uplayer.video.player;end'; };
     window.Download      = function () {
         var downloadUrl = '/api/download/' + encodeURIComponent('{{ file_id|default(0) }}');
         fetch(downloadUrl, { method: 'POST', keepalive: true })
@@ -971,6 +849,22 @@
             .catch(function () {})
             .finally(function () { window.location.href = Link; });
     };
+
+    // ── Business spotlight carousel
+    (function () {
+        var slides = Array.prototype.slice.call(document.querySelectorAll('.biz-slide'));
+        var dots = Array.prototype.slice.call(document.querySelectorAll('.biz-dot'));
+        if (!slides.length) return;
+        var index = 0, timer;
+        function show(i) {
+            index = (i + slides.length) % slides.length;
+            slides.forEach(function (el, n) { el.classList.toggle('active', n === index); });
+            dots.forEach(function (el, n) { el.classList.toggle('active', n === index); });
+        }
+        dots.forEach(function (dot, n) { dot.addEventListener('click', function () { show(n); restart(); }); });
+        function restart() { clearInterval(timer); timer = setInterval(function () { show(index + 1); }, 5500); }
+        restart();
+    })();
 
     // ── Storage key from file URL (stable per video)
     var STORAGE_KEY = 'tcu:' + Link;
