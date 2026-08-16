@@ -362,6 +362,42 @@
         .report-link:hover { color: #f5aaaa; border-color: rgba(255,128,128,0.3); }
 
 
+
+        /* ─── LIVE VIEWERS ─── */
+        .viewer-bar {
+            max-width: 900px;
+            margin: 10px auto 0;
+            padding: 0 14px;
+        }
+        .viewer-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 13px;
+            border-radius: 50px;
+            background: rgba(255,92,92,0.07);
+            border: 1px solid rgba(255,92,92,0.18);
+            color: var(--muted2);
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+        }
+        .viewer-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--red);
+            box-shadow: 0 0 0 0 rgba(255,92,92,0.55);
+            animation: viewerPulse 1.7s infinite;
+        }
+        .viewer-count { color: #ffb1b1; font-weight: 800; }
+        .viewer-label { color: var(--muted2); }
+        @keyframes viewerPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,92,92,0.55); }
+            70% { box-shadow: 0 0 0 7px rgba(255,92,92,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,92,92,0); }
+        }
+
         /* ─── EXTERNAL PLAYERS ─── */
         .ext-section {
             max-width: 900px;
@@ -699,6 +735,13 @@
         </div>
     </div>
 </div>
+<div class="viewer-bar au d3" aria-live="polite">
+    <div class="viewer-pill" id="viewerPill" title="People currently watching this video">
+        <span class="viewer-dot" aria-hidden="true"></span>
+        <span class="viewer-count" id="viewerCount">0</span>
+        <span class="viewer-label" id="viewerLabel">Watching now</span>
+    </div>
+</div>
 
 <!-- ─── EXTERNAL PLAYERS ─── -->
 <div class="ext-section au d4">
@@ -902,6 +945,81 @@
     var videoEl  = document.getElementById('player');
     var seekL    = document.getElementById('seekLeft');
     var seekR    = document.getElementById('seekRight');
+    var viewerCountEl = document.getElementById('viewerCount');
+    var viewerLabelEl = document.getElementById('viewerLabel');
+    var VIDEO_ID = {{ video_id|tojson }};
+    var VIEWER_API = '/api/viewers/' + encodeURIComponent(VIDEO_ID);
+    var VIEWER_TTL_MS = 35000;
+    var viewerHeartbeat = null;
+    var viewerActive = false;
+    var viewerId = null;
+
+    try {
+        viewerId = sessionStorage.getItem('tcu_viewer_id');
+        if (!viewerId) {
+            viewerId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+            sessionStorage.setItem('tcu_viewer_id', viewerId);
+        }
+    } catch (e) {
+        viewerId = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    }
+
+    function updateViewerCount(count) {
+        count = Math.max(0, parseInt(count, 10) || 0);
+        if (viewerCountEl) viewerCountEl.textContent = count.toLocaleString();
+        if (viewerLabelEl) viewerLabelEl.textContent = count === 1 ? 'Watching now' : 'Watching now';
+    }
+
+    async function viewerRequest(action, keepalive) {
+        try {
+            var response = await fetch(VIEWER_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ viewer_id: viewerId, action: action }),
+                keepalive: !!keepalive,
+                cache: 'no-store'
+            });
+            if (response.ok) {
+                var data = await response.json();
+                updateViewerCount(data.viewers);
+            }
+        } catch (e) {}
+    }
+
+    async function fetchViewerCount() {
+        try {
+            var response = await fetch(VIEWER_API, { cache: 'no-store' });
+            if (response.ok) {
+                var data = await response.json();
+                updateViewerCount(data.viewers);
+            }
+        } catch (e) {}
+    }
+
+    function startViewerTracking() {
+        if (viewerActive) {
+            viewerRequest('heartbeat', false);
+            return;
+        }
+        viewerActive = true;
+        viewerRequest('heartbeat', false);
+        clearInterval(viewerHeartbeat);
+        viewerHeartbeat = setInterval(function () {
+            if (viewerActive && !videoEl.paused && !videoEl.ended) {
+                viewerRequest('heartbeat', false);
+            }
+        }, 12000);
+    }
+
+    function stopViewerTracking() {
+        if (!viewerActive) return;
+        viewerActive = false;
+        clearInterval(viewerHeartbeat);
+        viewerHeartbeat = null;
+        viewerRequest('stop', true);
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
         var player = new Plyr('#player', {
@@ -927,6 +1045,16 @@
         videoEl.addEventListener('canplay',     function () { shell.classList.remove('is-loading'); });
         videoEl.addEventListener('waiting',     function () { shell.classList.add('is-loading'); });
         videoEl.addEventListener('playing',     function () { shell.classList.remove('is-loading'); });
+
+        // ── Live viewer counter: count only while this video is playing
+        videoEl.addEventListener('play', startViewerTracking);
+        videoEl.addEventListener('playing', startViewerTracking);
+        videoEl.addEventListener('pause', stopViewerTracking);
+        videoEl.addEventListener('ended', stopViewerTracking);
+        videoEl.addEventListener('emptied', stopViewerTracking);
+        fetchViewerCount();
+        window.addEventListener('pagehide', function () { stopViewerTracking(); });
+        window.addEventListener('beforeunload', function () { stopViewerTracking(); });
 
         // Resume playback
         videoEl.addEventListener('loadedmetadata', function () {
@@ -1050,4 +1178,3 @@
 </body>
 </html>
 <!--  Don't Remove Credit @VJ_Bots Subscribe YouTube Channel For Amazing Bot @Tech_VJ Ask Doubt on telegram @KingVJ01 -->
-
