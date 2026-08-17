@@ -8,6 +8,7 @@ from typing import Optional
 
 import boto3
 from botocore.config import Config
+from boto3.s3.transfer import TransferConfig
 from botocore.exceptions import ClientError
 
 from info import DATABASE_NAME, OTHER_DB_URI, LOG_CHANNEL
@@ -44,6 +45,23 @@ _locks_guard = asyncio.Lock()
 _cleanup_lock = asyncio.Lock()
 _last_cleanup = 0.0
 
+# Long-running media operations need explicit network/application timeouts.
+# These are configurable because upload speed varies by Railway region/bucket.
+TELEGRAM_DOWNLOAD_TIMEOUT = int(
+    os.environ.get("BUCKET_TELEGRAM_DOWNLOAD_TIMEOUT", "900")
+)
+BUCKET_UPLOAD_TIMEOUT = int(
+    os.environ.get("BUCKET_UPLOAD_TIMEOUT", "900")
+)
+
+# Multipart uploads are substantially more reliable for large video files.
+TRANSFER_CONFIG = TransferConfig(
+    multipart_threshold=8 * 1024 * 1024,
+    multipart_chunksize=16 * 1024 * 1024,
+    max_concurrency=4,
+    use_threads=True,
+)
+
 
 def bucket_enabled() -> bool:
     return bool(BUCKET_NAME and BUCKET_ENDPOINT and BUCKET_ACCESS_KEY and BUCKET_SECRET_KEY)
@@ -61,7 +79,13 @@ def _client():
         aws_access_key_id=BUCKET_ACCESS_KEY,
         aws_secret_access_key=BUCKET_SECRET_KEY,
         region_name=BUCKET_REGION,
-        config=Config(signature_version="s3v4", retries={"max_attempts": 3, "mode": "standard"}),
+        config=Config(
+            signature_version="s3v4",
+            retries={"max_attempts": 3, "mode": "standard"},
+            connect_timeout=30,
+            read_timeout=120,
+            tcp_keepalive=True,
+        ),
     )
 
 
@@ -229,25 +253,76 @@ async def ensure_uploaded(file_id: int):
 
             # Pyrofork writes the Telegram file directly to disk; Railway ingress
             # is not billed as network egress.
-            downloaded = await TechVJBot.download_media(message, file_name=tmp_path)
+            logger.info(
+                "Starting Telegram download: file=%s size=%s timeout=%ss",
+                unique_id,
+                size,
+                TELEGRAM_DOWNLOAD_TIMEOUT,
+            )
+            try:
+                downloaded = await asyncio.wait_for(
+                    TechVJBot.download_media(message, file_name=tmp_path),
+                    timeout=TELEGRAM_DOWNLOAD_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                raise RuntimeError(
+                    f"Telegram media download timed out after "
+                    f"{TELEGRAM_DOWNLOAD_TIMEOUT}s."
+                )
+
             if not downloaded or not os.path.exists(tmp_path):
                 raise RuntimeError("Telegram media download failed.")
+
+            logger.info(
+                "Telegram download completed: file=%s actual_size=%s",
+                unique_id,
+                os.path.getsize(tmp_path),
+            )
 
             actual_size = os.path.getsize(tmp_path)
             if actual_size != size:
                 logger.warning("Telegram size mismatch: metadata=%s actual=%s", size, actual_size)
 
-            await asyncio.to_thread(
-                _client().upload_file,
-                tmp_path,
-                BUCKET_NAME,
+            logger.info(
+                "Starting bucket upload: file=%s key=%s size=%s timeout=%ss",
+                unique_id,
                 key,
-                ExtraArgs={
-                    "ContentType": file_data.mime_type or "application/octet-stream",
-                    "ContentDisposition": f'inline; filename="{Path(file_name).name}"',
-                    "CacheControl": "private, max-age=0",
-                },
+                actual_size,
+                BUCKET_UPLOAD_TIMEOUT,
             )
+
+            def _upload():
+                client = _client()
+                client.upload_file(
+                    tmp_path,
+                    BUCKET_NAME,
+                    key,
+                    ExtraArgs={
+                        "ContentType": file_data.mime_type or "application/octet-stream",
+                        "ContentDisposition": f'inline; filename="{Path(file_name).name}"',
+                        "CacheControl": "private, max-age=0",
+                    },
+                    Config=TRANSFER_CONFIG,
+                )
+
+            try:
+                await asyncio.wait_for(
+                    asyncio.to_thread(_upload),
+                    timeout=BUCKET_UPLOAD_TIMEOUT,
+                )
+            except asyncio.TimeoutError:
+                raise RuntimeError(
+                    f"Bucket upload timed out after {BUCKET_UPLOAD_TIMEOUT}s."
+                )
+
+            # Verify the object before telling the browser that it is ready.
+            logger.info("Verifying bucket object: %s", key)
+            if not await asyncio.to_thread(_head_object, key):
+                raise RuntimeError(
+                    f"Bucket upload completed but object was not found: {key}"
+                )
+
+            logger.info("Bucket upload completed successfully: %s", key)
 
             if _cache_col is not None:
                 _cache_col.update_one(
@@ -264,6 +339,7 @@ async def ensure_uploaded(file_id: int):
             reserved = False
             return key, file_data
         except Exception:
+            logger.exception("Media migration failed: file=%s key=%s", unique_id, key)
             if reserved:
                 await asyncio.to_thread(_release_upload, size)
             raise
