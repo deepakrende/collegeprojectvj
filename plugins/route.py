@@ -84,7 +84,7 @@ async def bucket_media_handler(request: web.Request):
     requests only return a short-lived presigned bucket URL.
     """
     try:
-        path = request.match_info["path"]
+        path = request.match_info["path"].lstrip("/")
         match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)(?:/.*)?$", path)
         if match:
             secure_hash = match.group(1)
@@ -109,7 +109,14 @@ async def bucket_media_handler(request: web.Request):
                 text="Video delivery storage is temporarily unavailable. Please try again later."
             )
 
+        started = time.monotonic()
+        logging.info("Preparing bucket media: file_id=%s", file_id)
         target = await get_presigned_url(file_id, int(expires))
+        logging.info(
+            "Bucket media ready: file_id=%s elapsed=%.2fs",
+            file_id,
+            time.monotonic() - started,
+        )
         raise web.HTTPFound(location=target)
     except web.HTTPException:
         raise
@@ -126,7 +133,7 @@ async def bucket_media_handler(request: web.Request):
 async def legacy_media_redirect_handler(request: web.Request):
     """Preserve older media links without streaming bytes through Railway."""
     try:
-        path = request.match_info["path"]
+        path = request.match_info["path"].lstrip("/")
         match = re.search(r"^([a-zA-Z0-9_-]{6})(\d+)(?:/.*)?$", path)
         if match:
             secure_hash = match.group(1)
@@ -148,7 +155,9 @@ async def legacy_media_redirect_handler(request: web.Request):
         ):
             return _expired_response()
 
-        target = request.rel_url.with_path("/media/" + path)
+        # Normalize accidental leading slashes so old links never become
+        # /media//664/... or /media////664/....
+        target = request.rel_url.with_path("/media/" + path.lstrip("/"))
         raise web.HTTPFound(location=str(target))
     except web.HTTPException:
         raise
