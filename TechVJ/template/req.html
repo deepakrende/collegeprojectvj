@@ -861,6 +861,9 @@
         if (fullTitle.length > 72) { div.textContent = fullTitle.slice(0, 72) + '…'; }
     }
 
+    // ── Current signed media URL (used for resume/download helpers)
+    var Link = {{ file_url|tojson }};
+
     // ── Storage key from file URL (stable per video)
     var STORAGE_KEY = 'tcu:' + Link;
     var PREF_KEY    = 'tcu:prefs';
