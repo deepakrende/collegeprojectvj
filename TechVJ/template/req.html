@@ -691,18 +691,19 @@
 
 
 
-<!-- ─── BUSINESS SPOTLIGHT — ABOVE TITLE ─── -->
-<div class="biz-strip-wrap au d2">
-    <div class="biz-strip" id="bizTop" role="link" tabindex="0">
-        <div class="biz-glow"></div>
-        <div class="biz-inner biz-fade" id="bizTopInner"></div>
-    </div>
-</div>
-
 <!-- ─── FILE TITLE ─── -->
 <div class="file-title-area au d3">
     <div class="file-label">Now Playing</div>
     <div class="file-name" id="myDiv">{{file_name}}</div>
+</div>
+
+<!-- ─── TELEGRAM CAROUSEL — ABOVE PLAYER ─── -->
+<div class="biz-strip-wrap au d3">
+    <div class="biz-strip" id="telegramCarousel" role="link" tabindex="0"
+         onclick="window.open('https://t.me/TeluguCinematic_universe','_blank','noopener')">
+        <div class="biz-glow"></div>
+        <div class="biz-inner biz-fade" id="telegramCarouselInner"></div>
+    </div>
 </div>
 
 <!-- ─── VIDEO PLAYER ─── -->
@@ -733,14 +734,6 @@
     </div>
 </div>
 
-
-<!-- ─── BUSINESS SPOTLIGHT — BELOW PLAYER ─── -->
-<div class="biz-strip-wrap au d4">
-    <div class="biz-card" id="bizBottom" role="link" tabindex="0">
-        <div class="biz-glow"></div>
-        <div class="biz-inner biz-fade" id="bizBottomInner"></div>
-    </div>
-</div>
 
 <!-- ─── QUALITY SELECTOR ─── -->
 {% if quality_options %}
@@ -809,47 +802,47 @@
 <script>
 (function () {
     'use strict';
-    // ── Business Spotlight carousel
+    // ── Telegram channel carousel
     (function () {
-        var DEST = 'https://t.me/YourBusiness';
+        var DEST = 'https://t.me/TeluguCinematic_universe';
         var slides = [
-            {k:'AI TOOLS', t:'Premium AI tools for your digital workflow', p:'Gemini · Gamma · Pictory · ElevenLabs',
-             logos:['gemini','gamma','pictory','elevenlabs']},
-            {k:'PREMIUM SOFTWARE', t:'Powerful tools for creators & professionals', p:'JetBrains · Webflow · Autodesk · Filmora',
-             logos:['jetbrains','webflow','autodesk','filmora']},
-            {k:'ENTERTAINMENT', t:'Premium entertainment services', p:'Netflix · Prime Video · JioHotstar · ZEE5',
-             logos:['netflix','prime','hotstar','zee5']},
-            {k:'CREATOR TOOLS', t:'Create, design and publish with better tools', p:'Pictory · Gamma · Filmora · Webflow',
-             logos:['pictory','gamma','filmora','webflow']}
+            {k:'TELEGRAM CHANNEL', t:'Join our Telegram channel', p:'Movies · Shows · Updates · More',
+             icon:'✈️'},
+            {k:'STAY UPDATED', t:'Don’t miss the latest uploads', p:'New releases & updates posted on Telegram',
+             icon:'📲'},
+            {k:'JOIN TCU', t:'Get movies and shows in one place', p:'Tap here to join our official Telegram channel',
+             icon:'🎬'}
         ];
-        var logoBase = 'https://cdn.simpleicons.org/';
-        var logoMap = {gemini:'google', gamma:'gamma', pictory:'pictory', elevenlabs:'elevenlabs',
-                       jetbrains:'jetbrains', webflow:'webflow', autodesk:'autodesk', filmora:'filmora',
-                       netflix:'netflix', prime:'primevideo', hotstar:'hotstar', zee5:'zee5'};
         var idx = 0;
-        function render(inner, i) {
+
+        function render(i) {
+            var inner = document.getElementById('telegramCarouselInner');
             if (!inner) return;
             var x = slides[i];
-            inner.classList.remove('biz-fade'); void inner.offsetWidth; inner.classList.add('biz-fade');
+            inner.classList.remove('biz-fade');
+            void inner.offsetWidth;
+            inner.classList.add('biz-fade');
+
             inner.innerHTML =
-                '<div class="biz-mark">✦</div>' +
-                '<div class="biz-copy"><div class="biz-kicker">'+x.k+'</div>' +
-                '<div class="biz-title">'+x.t+'</div><div class="biz-products">'+x.p+'</div></div>' +
-                '<div class="biz-dots">'+slides.map(function(_,n){return '<span class="biz-dot '+(n===i?'active':'')+'"></span>';}).join('')+'</div>' +
-                '<a class="biz-cta" href="'+DEST+'" target="_blank" rel="noopener">Explore →</a>' +
-                '<div class="biz-logos">'+x.logos.map(function(n){return '<span class="biz-logo"><img loading="lazy" src="'+logoBase+logoMap[n]+'" alt="'+n+'"></span>';}).join('')+'</div>';
+                '<div class="biz-mark">' + x.icon + '</div>' +
+                '<div class="biz-copy">' +
+                    '<div class="biz-kicker">' + x.k + '</div>' +
+                    '<div class="biz-title">' + x.t + '</div>' +
+                    '<div class="biz-products">' + x.p + '</div>' +
+                '</div>' +
+                '<div class="biz-dots">' +
+                    slides.map(function(_, n) {
+                        return '<span class="biz-dot ' + (n === i ? 'active' : '') + '"></span>';
+                    }).join('') +
+                '</div>' +
+                '<a class="biz-cta" href="' + DEST + '" target="_blank" rel="noopener">Join →</a>';
         }
-        function go(i) {
-            idx=(i+slides.length)%slides.length;
-            render(document.getElementById('bizTopInner'),idx);
-            render(document.getElementById('bizBottomInner'),(idx+1)%slides.length);
-        }
-        go(0);
-        setInterval(function(){go(idx+1);},5500);
-        ['bizTop','bizBottom'].forEach(function(id){
-            var el=document.getElementById(id);
-            if(el) el.addEventListener('click',function(e){ if(!e.target.closest('a')) window.open(DEST,'_blank','noopener'); });
-        });
+
+        render(0);
+        setInterval(function () {
+            idx = (idx + 1) % slides.length;
+            render(idx);
+        }, 4500);
     })();
 
 
