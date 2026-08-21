@@ -910,7 +910,7 @@
     }
 
     // ── Plyr setup
-    var controls = ['play-large','rewind','play','fast-forward','progress','current-time','duration','mute','volume','captions','settings','pip','airplay','download','fullscreen'];
+    var controls = ['play-large','rewind','play','fast-forward','progress','current-time','duration','mute','volume','captions','settings','pip','airplay','fullscreen'];
     var shell    = document.getElementById('playerShell');
     var errBox   = document.getElementById('playerError');
     var retryBtn = document.getElementById('retryBtn');
@@ -929,24 +929,7 @@
 
         // Count an explicit player download once per page. The media bytes are
         // delivered by the Railway Bucket, not by this Railway service.
-        var downloadCounted = false;
-        function countDownload() {
-            if (downloadCounted) return;
-            downloadCounted = true;
-            fetch('/api/download/{{ file_id|default(0) }}', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                keepalive: true
-            }).then(function (r) { return r.json(); })
-              .then(function (data) {
-                  var el = document.getElementById('totalDownloads');
-                  if (el && typeof data.downloads === 'number') el.textContent = data.downloads.toLocaleString();
-              }).catch(function () {});
-        }
-        document.addEventListener('click', function (e) {
-            if (e.target && e.target.closest('.plyr__control[data-plyr="download"]')) countDownload();
-        });
-
+        
         var prefs = loadJSON(PREF_KEY, { vol: 1, muted: false, speed: 1 });
         var state = loadJSON(STORAGE_KEY, null);
 
