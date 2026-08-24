@@ -146,16 +146,7 @@ async def auto_approve(client, message: ChatJoinRequest):
                     fileName = {quote_plus(get_name(log_msg))}
                     stream, download = make_stream_links(log_msg.id, quote_plus(get_name(log_msg)), get_hash(log_msg))
 
-                if STREAM_MODE == True:
-                    button = [[
-                        InlineKeyboardButton("• ᴅᴏᴡɴʟᴏᴀᴅ •", url=download),
-                        InlineKeyboardButton('• ᴡᴀᴛᴄʜ •', url=stream)
-                    ],[
-                        InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
-                    ]]
-                    reply_markup = InlineKeyboardMarkup(button)
-                else:
-                    reply_markup = None
+                reply_markup = None
                     
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,
