@@ -4,7 +4,7 @@
 
 import logging, re, asyncio
 from utils import temp
-from info import ADMINS
+from info import ADMINS, SESSION_SWITCH_LIMIT
 from pyrogram import Client, filters, enums
 from pyrogram.errors import FloodWait, MessageNotModified
 from pyrogram.errors.exceptions.bad_request_400 import (
@@ -22,23 +22,61 @@ logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
 
 
-def get_index_client(bot):
+def _get_user_clients():
+    """Returns the list of started user (session string) clients, if any."""
+    clients = getattr(temp, 'USER_CLIENTS', None)
+    if clients:
+        return clients
+
+    # Backward-compat: only a single USER_CLIENT was set.
+    single = getattr(temp, 'USER_CLIENT', None)
+    return [single] if single is not None else []
+
+
+async def get_index_client(bot, chat_id=None):
     """
-    Returns user client if SESSION_STRING is set and client is available,
-    otherwise falls back to bot client.
-    User client can access channels where bot is not admin/member.
+    Picks the best available client for indexing.
+
+    - With one or more SESSION_STRINGs configured, and a chat_id given,
+      each user session is tried in turn and the first one that can
+      actually access that chat is used (a channel may only be joined
+      by some of the accounts).
+    - With no chat_id given (client not needed for an access check yet),
+      user sessions are used round-robin so indexing load is spread
+      across accounts.
+    - Falls back to the bot client if no user session works / is set.
     """
-    user = getattr(temp, 'USER_CLIENT', None)
+    users = _get_user_clients()
 
-    if user is not None:
-        logger.info("Using USER CLIENT for indexing")
-        return user
+    if not users:
+        logger.info("Using BOT CLIENT for indexing")
+        return bot
 
-    logger.info("Using BOT CLIENT for indexing")
-    return bot
+    if chat_id is not None:
+        for i, user in enumerate(users):
+            try:
+                await user.get_chat(chat_id)
+                logger.info(
+                    "Using USER CLIENT #%s for indexing chat %s", i + 1, chat_id
+                )
+                return user
+            except Exception:
+                continue
+
+        logger.info(
+            "No user client has access to %s, falling back to BOT CLIENT",
+            chat_id
+        )
+        return bot
+
+    # No chat specified yet — round robin among available user clients.
+    rr = getattr(temp, 'INDEX_CLIENT_RR', 0) % len(users)
+    temp.INDEX_CLIENT_RR = rr + 1
+    logger.info("Using USER CLIENT #%s for indexing (round-robin)", rr + 1)
+    return users[rr]
 
 
-async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None):
+async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None, offset_id=0):
     """
     Compatibility message iterator.
 
@@ -46,6 +84,10 @@ async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None)
     while others expose get_chat_history().
 
     This function automatically uses whichever API exists.
+
+    offset_id lets iteration resume partway through a chat's history —
+    used when rotating to a different account mid-index so the new
+    account picks up right after the last message the previous one saw.
     """
 
     # Standard Pyrogram / compatible client
@@ -57,7 +99,8 @@ async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None)
 
         async for message in client.iter_messages(
             chat_id,
-            limit=limit
+            limit=limit,
+            offset_id=offset_id
         ):
             if min_message_id is not None and message.id < min_message_id:
                 break
@@ -78,7 +121,8 @@ async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None)
 
         async for message in client.get_chat_history(
             chat_id=chat_id,
-            limit=limit
+            limit=limit,
+            offset_id=offset_id
         ):
             if min_message_id is not None and message.id < min_message_id:
                 break
@@ -96,6 +140,103 @@ async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None)
         f"Telegram client {type(client).__name__!r} "
         "has neither 'iter_messages' nor 'get_chat_history'"
     )
+
+
+async def iter_messages_rotating_clients(
+    clients, chat_id, limit, min_message_id, quota
+):
+    """
+    Iterates a chat's messages for indexing, spread across one or more
+    clients. After `quota` files have been confirmed SAVED on the
+    current client, it rotates to the next client and resumes right
+    after the last message seen — so no single account has to make
+    all the API calls for a big channel and risk a FloodWait.
+
+    This is an async generator you drive manually with asend():
+
+        gen = iter_messages_rotating_clients(...)
+        saved = None
+        while True:
+            try:
+                message, active_client = await gen.asend(saved)
+            except StopAsyncIteration:
+                break
+            ... process message, save/skip it ...
+            saved = True  # only when it was newly saved as a file, else False
+
+    If a client errors out partway through (e.g. it isn't a member of
+    the chat, or gets kicked), it's skipped and the next one is tried
+    from the same position; if every client fails, the error from the
+    last one propagates.
+    """
+    if not clients:
+        return
+
+    offset_id = 0
+    client_idx = 0
+
+    while True:
+        client = clients[client_idx % len(clients)]
+        files_this_client = 0
+        last_seen_id = None
+        rotated = False
+        failed_error = None
+
+        logger.info(
+            "Indexing chat %s with account #%s/%s (resuming after msg %s)",
+            chat_id, client_idx + 1, len(clients), offset_id
+        )
+
+        try:
+            async for message in iter_messages_compat(
+                client,
+                chat_id,
+                limit=limit,
+                min_message_id=min_message_id,
+                offset_id=offset_id
+            ):
+                last_seen_id = message.id
+
+                saved = yield message, client
+
+                if quota and saved:
+                    files_this_client += 1
+
+                    if len(clients) > 1 and files_this_client >= quota:
+                        logger.info(
+                            "Account #%s hit its %s-file quota, "
+                            "rotating to the next account",
+                            client_idx + 1, quota
+                        )
+                        rotated = True
+                        break
+
+        except GeneratorExit:
+            raise
+
+        except Exception as e:
+            logger.warning(
+                "Account #%s errored while indexing %s: %s",
+                client_idx + 1, chat_id, e
+            )
+            failed_error = e
+
+        if last_seen_id is not None:
+            offset_id = last_seen_id
+
+        if rotated:
+            client_idx += 1
+            continue
+
+        if failed_error is not None:
+            if client_idx + 1 < len(clients):
+                client_idx += 1
+                continue
+            raise failed_error
+
+        # This client's iterator ran out naturally (hit min_message_id
+        # or the end of the chat's history) — nothing left to index.
+        break
 
 
 @Client.on_callback_query(filters.regex(r'^index'))
@@ -155,8 +296,8 @@ async def index_files(bot, query):
     except Exception:
         pass
 
-    # Use USER_CLIENT if available.
-    index_client = get_index_client(bot)
+    # Use a USER_CLIENT that can access this chat, if any is available.
+    index_client = await get_index_client(bot, chat_id=chat)
 
     # Run indexing in background.
     asyncio.create_task(
@@ -171,9 +312,6 @@ async def index_files(bot, query):
 
 @Client.on_message(filters.private & filters.command('index'))
 async def send_for_index(bot, message):
-
-    # Use user client if available.
-    index_client = get_index_client(bot)
 
     vj = await bot.ask(
         message.chat.id,
@@ -218,6 +356,9 @@ async def send_for_index(bot, message):
 
     else:
         return
+
+    # Pick whichever client (user session or bot) can access this chat.
+    index_client = await get_index_client(bot, chat_id=chat_id)
 
     # Check channel access.
     try:
@@ -273,7 +414,7 @@ async def send_for_index(bot, message):
 
         client_note = (
             "👤 Using your account (user session)"
-            if getattr(temp, 'USER_CLIENT', None)
+            if index_client is not bot
             else
             "🤖 Using bot client"
         )
@@ -418,10 +559,14 @@ async def index_files_to_db(
     client
 ):
     """
-    Index files using the supplied Telegram client.
+    Index files, spreading the work across all configured user
+    sessions (SESSION_STRING / SESSION_STRING1, 2, 3, ...).
 
-    USER_CLIENT is preferred when SESSION_STRING exists.
-    BOT CLIENT is used as fallback.
+    Rotates to the next account every SESSION_SWITCH_LIMIT files so a
+    single account never makes enough calls to trip a FloodWait.
+    `client` (usually the bot, or whichever session was already
+    confirmed to have access) is only used as a fallback when no
+    SESSION_STRINGs are configured at all.
     """
 
     total_files = 0
@@ -439,32 +584,50 @@ async def index_files_to_db(
 
             temp.CANCEL = False
 
-            logger.info(
-                "Starting indexing with client: %s",
-                type(client).__name__
-            )
+            clients = _get_user_clients() or [client]
+            quota = SESSION_SWITCH_LIMIT if len(clients) > 1 else 0
 
-            logger.info(
-                "iter_messages available: %s",
-                hasattr(client, "iter_messages")
-            )
-
-            logger.info(
-                "get_chat_history available: %s",
-                hasattr(client, "get_chat_history")
-            )
+            if quota:
+                logger.info(
+                    "Multi-account indexing: %s accounts, "
+                    "rotating every %s files",
+                    len(clients), quota
+                )
 
             # IMPORTANT:
             # Do NOT call client.iter_messages() directly.
-            # Use compatibility iterator.
-            async for message in iter_messages_compat(
-                client,
+            # Use the rotating compatibility iterator so, when multiple
+            # SESSION_STRINGs are configured, load is spread across
+            # accounts instead of hammering a single one.
+            rotator = iter_messages_rotating_clients(
+                clients,
                 chat,
                 limit=lst_msg_id,
-                min_message_id=temp.CURRENT
-            ):
+                min_message_id=temp.CURRENT,
+                quota=quota
+            )
+
+            saved_flag = None
+            accounts_used = 1
+
+            while True:
+
+                try:
+                    message, active_client = await rotator.asend(saved_flag)
+                except StopAsyncIteration:
+                    break
+
+                saved_flag = False
+
+                accounts_used = max(
+                    accounts_used,
+                    clients.index(active_client) + 1
+                    if active_client in clients else accounts_used
+                )
 
                 if temp.CANCEL:
+
+                    await rotator.aclose()
 
                     await msg.edit(
                         f"Successfully Cancelled!!\n\n"
@@ -523,6 +686,11 @@ async def index_files_to_db(
 
                                 f"Errors Occurred: "
                                 f"<code>{errors}</code>"
+                                + (
+                                    f"\n\nAccounts used so far: "
+                                    f"<code>{accounts_used}/{len(clients)}</code>"
+                                    if quota else ""
+                                )
                             ),
 
                             reply_markup=reply
@@ -580,6 +748,7 @@ async def index_files_to_db(
                 if aynav:
 
                     total_files += 1
+                    saved_flag = True
 
                 elif vnay == 0:
 
