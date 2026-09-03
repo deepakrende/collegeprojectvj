@@ -69,7 +69,11 @@ def clean_file_name(file_name):
     return new_file_name
 
 def add_space_between_e_and_number(input_string):
-    output_string = re.sub(r'(e|E)([0-9])', r'1 2', input_string)
+    """
+    Turns 'S01E25' into 'S01 E25' (a space before the episode marker),
+    including multi-digit episode numbers like 'S01E100'.
+    """
+    output_string = re.sub(r'(\d)([eE]\d+)', r'\1 \2', input_string)
     return output_string
     
 def is_file_already_saved(file_id, file_name):
