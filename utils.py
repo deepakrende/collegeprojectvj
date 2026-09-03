@@ -46,6 +46,9 @@ class temp(object):
     SHORT = {}
     SETTINGS = {}
     IMDB_CAP = {}
+    USER_CLIENT = None
+    USER_CLIENTS = []
+    INDEX_CLIENT_RR = 0
 
 
 async def pub_is_subscribed(bot, query, channel):
@@ -736,4 +739,3 @@ async def get_seconds(time_string):
         return value * 86400 * 365
     else:
         return 0
-
