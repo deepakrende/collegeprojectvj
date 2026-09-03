@@ -33,22 +33,35 @@ files = glob.glob(ppath)
 
 TechVJBot.start()
 
-# ✅ NEW: Start user client if SESSION_STRING is set
-UserClient = None
-if SESSION_STRING:
+# ✅ Start user client(s) if any SESSION_STRING(s) are set.
+# Supports multiple sessions (SESSION_STRING1, SESSION_STRING2, ...) so
+# indexing can spread across several accounts / access more channels.
+UserClients = []
+if SESSION_STRINGS:
     from pyrogram import Client as PyroClient
-    UserClient = PyroClient(
-        name="UserSession",
-        api_id=API_ID,
-        api_hash=API_HASH,
-        session_string=SESSION_STRING
-    )
-    UserClient.start()
-    temp.USER_CLIENT = UserClient
-    print("✅ User Client Started Successfully")
+
+    for idx, s_string in enumerate(SESSION_STRINGS, start=1):
+        try:
+            client = PyroClient(
+                name=f"UserSession{idx}",
+                api_id=API_ID,
+                api_hash=API_HASH,
+                session_string=s_string
+            )
+            client.start()
+            UserClients.append(client)
+            print(f"✅ User Client {idx} Started Successfully")
+        except Exception as e:
+            print(f"❌ Failed To Start User Client {idx}: {e}")
+
+if UserClients:
+    temp.USER_CLIENT = UserClients[0]
+    temp.USER_CLIENTS = UserClients
+    print(f"✅ {len(UserClients)} User Client(s) Ready For Indexing")
 else:
     temp.USER_CLIENT = None
-    print("ℹ️ No SESSION_STRING set — using bot client for indexing")
+    temp.USER_CLIENTS = []
+    print("ℹ️ No SESSION_STRING(s) set — using bot client for indexing")
 
 loop = asyncio.get_event_loop()
 
