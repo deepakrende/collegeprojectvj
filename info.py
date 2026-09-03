@@ -15,8 +15,35 @@ API_ID = int(environ.get('API_ID', ''))
 API_HASH = environ.get('API_HASH', '')
 BOT_TOKEN = environ.get('BOT_TOKEN', "")
 
-# ✅ NEW: User account session string for indexing private channels
+# ✅ User account session string(s) for indexing private channels.
+# Single session: just set SESSION_STRING.
+# Multiple sessions: set SESSION_STRING1, SESSION_STRING2, SESSION_STRING3, ...
+# (SESSION_STRING, if also set, is used as an extra/first session for
+# backward compatibility with older configs.)
 SESSION_STRING = environ.get('SESSION_STRING', None)
+
+
+def _parse_multi_sessions():
+    pattern = re.compile(r'^SESSION_STRING(\d+)$')
+    numbered = []
+    for key, value in environ.items():
+        match = pattern.match(key)
+        if match and value.strip():
+            numbered.append((int(match.group(1)), value.strip()))
+    numbered.sort(key=lambda item: item[0])
+    return [value for _, value in numbered]
+
+
+SESSION_STRINGS = (
+    ([SESSION_STRING.strip()] if SESSION_STRING and SESSION_STRING.strip() else [])
+    + _parse_multi_sessions()
+)
+
+# Number of files to index with one session account before automatically
+# rotating to the next SESSION_STRING account. Keeps each account's API
+# usage capped so indexing large channels doesn't trip a FloodWait /
+# get an account limited. Only matters when 2+ SESSION_STRINGs are set.
+SESSION_SWITCH_LIMIT = int(environ.get('SESSION_SWITCH_LIMIT', 10000))
 
 # This Pictures Is For Start Message Picture, You Can Add Multiple By Giving One Space Between Each.
 PICS = (environ.get('PICS', 'https://graph.org/file/2ed90a79eb533d86f8a0f.jpg')).split()
