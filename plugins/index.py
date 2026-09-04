@@ -143,102 +143,188 @@ async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None,
 
 
 async def iter_messages_rotating_clients(
-    clients, chat_id, limit, min_message_id, quota
+    clients, chat_id, limit, min_message_id, quota, bot=None, log_channel=None
 ):
     """
-    Iterates a chat's messages for indexing, spread across one or more
-    clients. After `quota` files have been confirmed SAVED on the
-    current client, it rotates to the next client and resumes right
-    after the last message seen — so no single account has to make
-    all the API calls for a big channel and risk a FloodWait.
+    Iterates chat messages across multiple accounts with full FloodWait handling:
 
-    This is an async generator you drive manually with asend():
-
-        gen = iter_messages_rotating_clients(...)
-        saved = None
-        while True:
-            try:
-                message, active_client = await gen.asend(saved)
-            except StopAsyncIteration:
-                break
-            ... process message, save/skip it ...
-            saved = True  # only when it was newly saved as a file, else False
-
-    If a client errors out partway through (e.g. it isn't a member of
-    the chat, or gets kicked), it's skipped and the next one is tried
-    from the same position; if every client fails, the error from the
-    last one propagates.
+    - Rotates to the next account every `quota` MESSAGES FETCHED.
+    - On FloodWait: immediately skips to next available account.
+      The flooded account is put into cooldown and automatically
+      re-added to rotation once its wait expires.
+    - If ALL accounts are simultaneously flooded, waits for the
+      soonest one to recover instead of crashing.
+    - Non-FloodWait errors skip the account; if every client fails,
+      the last error propagates.
     """
+    import time as _time
+
     if not clients:
         return
 
-    offset_id = 0
+    offset_id  = 0
     client_idx = 0
 
+    # FloodWait tracking: {client_index: monotonic_time_when_free}
+    flood_until = {}
+
+    async def _notify(text):
+        """Send account switch notification to LOG_CHANNEL if bot is available."""
+        if bot and log_channel:
+            try:
+                await bot.send_message(log_channel, text, disable_web_page_preview=True)
+            except Exception as _e:
+                logger.warning("Could not send account switch notification: %s", _e)
+
+    def _available():
+        now = _time.monotonic()
+        return [(i, c) for i, c in enumerate(clients) if flood_until.get(i, 0) <= now]
+
+    async def _wait_for_recovery():
+        """Block until at least one account is out of FloodWait."""
+        now     = _time.monotonic()
+        soonest = min(flood_until.values())
+        wait    = max(1, soonest - now + 1)
+        logger.warning(
+            "ALL %s accounts are in FloodWait. Waiting %.0fs for earliest recovery...",
+            len(clients), wait
+        )
+        asyncio.create_task(_notify(
+            f"🛑 <b>ALL Accounts in FloodWait!</b>\n\n"
+            f"All <b>{len(clients)}</b> accounts are flooded.\n"
+            f"⏳ Indexing paused. Waiting <b>{wait:.0f}s</b> for earliest account to recover...\n\n"
+            f"📊 Chat: <code>{chat_id}</code>"
+        ))
+        await asyncio.sleep(wait)
+        now = _time.monotonic()
+        for k in list(flood_until):
+            if flood_until[k] <= now:
+                del flood_until[k]
+                logger.info("Account #%s FloodWait expired — back in rotation", k + 1)
+                asyncio.create_task(_notify(
+                    f"▶️ <b>Indexing Resumed!</b>\n\n"
+                    f"Account <b>#{k + 1}</b> recovered from FloodWait\n"
+                    f"Indexing is continuing now...\n\n"
+                    f"📊 Chat: <code>{chat_id}</code>"
+                ))
+
     while True:
-        client = clients[client_idx % len(clients)]
-        files_this_client = 0
-        last_seen_id = None
-        rotated = False
-        failed_error = None
+        available = _available()
+        if not available:
+            await _wait_for_recovery()
+            available = _available()
+
+        # Pick nearest to client_idx to preserve rotation order
+        chosen_idx, client = min(available, key=lambda x: (x[0] - client_idx) % len(clients))
+        client_idx = chosen_idx
+
+        msgs_this_client = 0
+        last_seen_id     = None
+        rotated          = False
+        failed_error     = None
 
         logger.info(
-            "Indexing chat %s with account #%s/%s (resuming after msg %s)",
+            "Indexing chat %s with account #%s/%s (offset_id=%s)",
             chat_id, client_idx + 1, len(clients), offset_id
         )
+        asyncio.create_task(_notify(
+            f"🟢 <b>Now Using Account #{client_idx + 1}</b>\n\n"
+            f"📂 Indexing chat: <code>{chat_id}</code>\n"
+            f"👤 Active account: <b>#{client_idx + 1} of {len(clients)}</b>\n"
+            f"📍 Resuming from offset: <code>{offset_id}</code>"
+        ))
 
         try:
             async for message in iter_messages_compat(
-                client,
-                chat_id,
+                client, chat_id,
                 limit=limit,
                 min_message_id=min_message_id,
                 offset_id=offset_id
             ):
                 last_seen_id = message.id
-
                 saved = yield message, client
 
-                # ✅ CHANGED: rotate based on MESSAGES FETCHED, not files saved
-                # This means every message (media, non-media, duplicate, deleted)
-                # counts toward the rotation quota, giving more predictable switching
+                # ✅ Rotate based on MESSAGES FETCHED (not files saved)
                 if quota:
-                    files_this_client += 1
-
-                    if len(clients) > 1 and files_this_client >= quota:
+                    msgs_this_client += 1
+                    if len(clients) > 1 and msgs_this_client >= quota:
+                        next_idx = (client_idx + 1) % len(clients)
                         logger.info(
-                            "Account #%s fetched %s messages, "
-                            "rotating to the next account",
-                            client_idx + 1, quota
+                            "Account #%s fetched %s messages — rotating to account #%s",
+                            client_idx + 1, quota, next_idx + 1
                         )
+                        asyncio.create_task(_notify(
+                            f"🔄 <b>Account Rotation</b>\n\n"
+                            f"✅ Account <b>#{client_idx + 1}</b> completed quota of <b>{quota} messages</b>\n"
+                            f"➡️ Switching to Account <b>#{next_idx + 1}</b> now\n\n"
+                            f"📊 Chat: <code>{chat_id}</code>"
+                        ))
                         rotated = True
                         break
 
         except GeneratorExit:
             raise
 
-        except Exception as e:
+        except FloodWait as fw:
+            # ✅ FloodWait: put account in cooldown, rotate immediately
+            wait_secs  = fw.value + 2  # small safety buffer
+            release_at = _time.monotonic() + wait_secs
+            flood_until[client_idx] = release_at
+
+            next_fw_idx = (client_idx + 1) % len(clients)
             logger.warning(
-                "Account #%s errored while indexing %s: %s",
-                client_idx + 1, chat_id, e
+                "Account #%s got FloodWait(%ss). Skipping to account #%s now. "
+                "This account recovers in ~%ss.",
+                client_idx + 1, fw.value, next_fw_idx + 1, wait_secs
             )
+
+            asyncio.create_task(_notify(
+                f"⚠️ <b>FloodWait Detected!</b>\n\n"
+                f"🚫 Account <b>#{client_idx + 1}</b> got FloodWait for <b>{fw.value}s</b>\n"
+                f"➡️ Switching to Account <b>#{next_fw_idx + 1}</b> immediately\n"
+                f"⏰ Account #{client_idx + 1} will auto-recover in <b>~{wait_secs}s</b>\n\n"
+                f"📊 Chat: <code>{chat_id}</code> | Last msg: <code>{last_seen_id}</code>"
+            ))
+
+            # Background task: notify when account recovers
+            async def _log_recovery(idx=client_idx, secs=wait_secs):
+                await asyncio.sleep(secs)
+                logger.info(
+                    "Account #%s FloodWait ended — re-entering rotation.",
+                    idx + 1
+                )
+                asyncio.create_task(_notify(
+                    f"✅ <b>Account #{idx + 1} Recovered!</b>\n\n"
+                    f"FloodWait ended — Account <b>#{idx + 1}</b> is back in rotation\n"
+                    f"📊 Chat: <code>{chat_id}</code>"
+                ))
+            asyncio.create_task(_log_recovery())
+
+            # Save position and move to next account immediately
+            if last_seen_id is not None:
+                offset_id = last_seen_id
+            client_idx = next_fw_idx
+            continue
+
+        except Exception as e:
+            logger.warning("Account #%s error: %s", client_idx + 1, e)
             failed_error = e
 
         if last_seen_id is not None:
             offset_id = last_seen_id
 
         if rotated:
-            client_idx += 1
+            client_idx = (client_idx + 1) % len(clients)
             continue
 
         if failed_error is not None:
-            if client_idx + 1 < len(clients):
-                client_idx += 1
+            remaining = [x for x in _available() if x[0] != client_idx]
+            if remaining:
+                client_idx = (client_idx + 1) % len(clients)
                 continue
             raise failed_error
 
-        # This client's iterator ran out naturally (hit min_message_id
-        # or the end of the chat's history) — nothing left to index.
+        # Iterator exhausted naturally — indexing complete
         break
 
 
@@ -308,7 +394,8 @@ async def index_files(bot, query):
             int(lst_msg_id),
             chat,
             msg,
-            index_client
+            index_client,
+            bot=bot
         )
     )
 
@@ -559,7 +646,8 @@ async def index_files_to_db(
     lst_msg_id,
     chat,
     msg,
-    client
+    client,
+    bot=None
 ):
     """
     Index files, spreading the work across all configured user
@@ -608,7 +696,9 @@ async def index_files_to_db(
                 chat,
                 limit=lst_msg_id,
                 min_message_id=temp.CURRENT,
-                quota=quota
+                quota=quota,
+                bot=bot,
+                log_channel=LOG_CHANNEL
             )
 
             saved_flag = None
