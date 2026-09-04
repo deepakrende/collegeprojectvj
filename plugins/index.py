@@ -199,12 +199,15 @@ async def iter_messages_rotating_clients(
 
                 saved = yield message, client
 
-                if quota and saved:
+                # ✅ CHANGED: rotate based on MESSAGES FETCHED, not files saved
+                # This means every message (media, non-media, duplicate, deleted)
+                # counts toward the rotation quota, giving more predictable switching
+                if quota:
                     files_this_client += 1
 
                     if len(clients) > 1 and files_this_client >= quota:
                         logger.info(
-                            "Account #%s hit its %s-file quota, "
+                            "Account #%s fetched %s messages, "
                             "rotating to the next account",
                             client_idx + 1, quota
                         )
@@ -562,8 +565,9 @@ async def index_files_to_db(
     Index files, spreading the work across all configured user
     sessions (SESSION_STRING / SESSION_STRING1, 2, 3, ...).
 
-    Rotates to the next account every SESSION_SWITCH_LIMIT files so a
-    single account never makes enough calls to trip a FloodWait.
+    Rotates to the next account every SESSION_SWITCH_LIMIT MESSAGES
+    FETCHED (not files saved) so a single account never makes enough
+    API calls to trip a FloodWait.
     `client` (usually the bot, or whichever session was already
     confirmed to have access) is only used as a fallback when no
     SESSION_STRINGs are configured at all.
@@ -590,7 +594,7 @@ async def index_files_to_db(
             if quota:
                 logger.info(
                     "Multi-account indexing: %s accounts, "
-                    "rotating every %s files",
+                    "rotating every %s messages fetched",
                     len(clients), quota
                 )
 
