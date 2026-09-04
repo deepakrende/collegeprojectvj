@@ -610,6 +610,15 @@ async def index_files_to_db(
             saved_flag = None
             accounts_used = 1
             edit_cooldown_until = 0
+            last_edit_time = 0
+
+            # Tuned for very large indexing runs (700k+ files). At this
+            # scale, editing too often adds up to thousands of calls over
+            # a multi-hour job - so we update rarely and enforce a solid
+            # minimum gap between edits to stay well clear of Telegram's
+            # flood limits.
+            PROGRESS_INTERVAL = 1000  # messages between progress edits
+            MIN_EDIT_GAP = 15         # seconds - minimum time between edits
 
             while True:
 
@@ -652,12 +661,15 @@ async def index_files_to_db(
                 if current % 5 == 0:
                     await asyncio.sleep(0.05)
 
-                # Update progress every 150 messages (unless we're still in
-                # a FloodWait cooldown from a previous edit attempt).
-                # Raised from 30 -> 150 to cut down how often we call
-                # editMessage during a big indexing run, since that's what
-                # was tripping Telegram's flood limits.
-                if current % 150 == 0 and time.time() >= edit_cooldown_until:
+                # Update progress every PROGRESS_INTERVAL messages (unless
+                # we're still in a FloodWait cooldown from a previous edit
+                # attempt, or it's been less than MIN_EDIT_GAP seconds
+                # since the last edit).
+                if (
+                    current % PROGRESS_INTERVAL == 0
+                    and time.time() >= edit_cooldown_until
+                    and time.time() - last_edit_time >= MIN_EDIT_GAP
+                ):
 
                     can = [[
                         InlineKeyboardButton(
@@ -700,6 +712,8 @@ async def index_files_to_db(
 
                             reply_markup=reply
                         )
+
+                        last_edit_time = time.time()
 
                     except MessageNotModified:
 
