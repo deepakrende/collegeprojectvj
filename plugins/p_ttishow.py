@@ -180,8 +180,17 @@ async def get_ststs(bot, message):
         used_dbSize3 = (stats3['dataSize']/(1024*1024))+(stats3['indexSize']/(1024*1024))
         free_dbSize3 = 512-used_dbSize3
         await rju.edit(script.STATUS_TXT.format((int(filesp)+int(totalsec)), total_users, totl_chats, filesp, round(used_dbSize, 2), round(free_dbSize, 2), totalsec, round(used_dbSize2, 2), round(free_dbSize2, 2), round(used_dbSize3, 2), round(free_dbSize3, 2)))
+    except FloodWait as e:
+        # Telegram is rate-limiting edits on this account right now.
+        # Don't try to edit again (that would just trigger another FloodWait) - just log it.
+        print(f"FloodWait on /stats: must wait {e.value}s before editing again")
     except Exception as e:
-        await rju.edit(f"Error - {e}")
+        try:
+            await rju.edit(f"Error - {e}")
+        except FloodWait as fw:
+            print(f"FloodWait while reporting error on /stats: must wait {fw.value}s")
+        except Exception:
+            pass
 
 @Client.on_message(filters.command('invite') & filters.user(ADMINS))
 async def gen_invite(bot, message):
@@ -296,4 +305,3 @@ async def list_chats(bot, message):
         with open('chats.txt', 'w+') as outfile:
             outfile.write(out)
         await message.reply_document('chats.txt', caption="List Of Chats")
-
