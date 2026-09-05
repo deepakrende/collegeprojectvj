@@ -21,6 +21,7 @@ BOT_TOKEN = environ.get('BOT_TOKEN', "")
 # (SESSION_STRING, if also set, is used as an extra/first session for
 # backward compatibility with older configs.)
 SESSION_STRING = environ.get('SESSION_STRING', None)
+BOT_SESSION_STRING = os.environ.get("BOT_SESSION_STRING")
 
 
 def _parse_multi_sessions():
