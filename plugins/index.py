@@ -53,18 +53,36 @@ async def get_index_client(bot, chat_id=None):
         return bot
 
     if chat_id is not None:
+        # The bot itself has to deliver these files later via
+        # send_cached_media(), and a Telegram file_id is only usable by
+        # whichever account originally fetched it — a user session's
+        # file_id can never be reused by the bot. So always prefer the
+        # bot's own client when it actually has access to the channel;
+        # only fall back to a user session (for channels the bot truly
+        # can't join) as a last resort, understanding that files indexed
+        # that way won't be directly sendable by the bot.
+        try:
+            await bot.get_chat(chat_id)
+            logger.info("Using BOT CLIENT for indexing chat %s", chat_id)
+            return bot
+        except Exception:
+            pass
+
         for i, user in enumerate(users):
             try:
                 await user.get_chat(chat_id)
                 logger.info(
-                    "Using USER CLIENT #%s for indexing chat %s", i + 1, chat_id
+                    "Bot has no access to %s; using USER CLIENT #%s "
+                    "for indexing instead (files indexed this way won't "
+                    "be sendable by the bot until it also has access)",
+                    chat_id, i + 1
                 )
                 return user
             except Exception:
                 continue
 
         logger.info(
-            "No user client has access to %s, falling back to BOT CLIENT",
+            "Neither the bot nor any user client can access %s",
             chat_id
         )
         return bot
