@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import logging, re, asyncio, time
+import logging, re, asyncio
 from utils import temp
 from info import ADMINS, SESSION_SWITCH_LIMIT
 from pyrogram import Client, filters, enums
@@ -143,7 +143,7 @@ async def iter_messages_compat(client, chat_id, limit=None, min_message_id=None,
 
 
 async def iter_messages_rotating_clients(
-    clients, chat_id, limit, min_message_id, quota
+    clients, chat_id, limit, min_message_id, quota, start_offset_id=0
 ):
     """
     Iterates a chat's messages for indexing, spread across one or more
@@ -151,6 +151,12 @@ async def iter_messages_rotating_clients(
     current client, it rotates to the next client and resumes right
     after the last message seen — so no single account has to make
     all the API calls for a big channel and risk a FloodWait.
+
+    start_offset_id lets you resume a previous, interrupted run:
+    pass the Telegram message ID you last got up to (from logs or the
+    progress message) and iteration starts just after it instead of
+    from the newest message in the chat. Leave it 0 to scan the whole
+    chat from the top, as usual.
 
     This is an async generator you drive manually with asend():
 
@@ -172,11 +178,12 @@ async def iter_messages_rotating_clients(
     if not clients:
         return
 
-    offset_id = 0
+    offset_id = start_offset_id
     client_idx = 0
 
     while True:
         client = clients[client_idx % len(clients)]
+        account_no = (client_idx % len(clients)) + 1
         files_this_client = 0
         last_seen_id = None
         rotated = False
@@ -184,7 +191,7 @@ async def iter_messages_rotating_clients(
 
         logger.info(
             "Indexing chat %s with account #%s/%s (resuming after msg %s)",
-            chat_id, client_idx + 1, len(clients), offset_id
+            chat_id, account_no, len(clients), offset_id
         )
 
         try:
@@ -206,7 +213,7 @@ async def iter_messages_rotating_clients(
                         logger.info(
                             "Account #%s hit its %s-file quota, "
                             "rotating to the next account",
-                            client_idx + 1, quota
+                            account_no, quota
                         )
                         rotated = True
                         break
@@ -214,10 +221,18 @@ async def iter_messages_rotating_clients(
         except GeneratorExit:
             raise
 
+        except FloodWait as e:
+            logger.warning(
+                "Account #%s hit a FloodWait (%ss) while indexing %s, "
+                "rotating to the next account immediately",
+                account_no, e.value, chat_id
+            )
+            failed_error = e
+
         except Exception as e:
             logger.warning(
                 "Account #%s errored while indexing %s: %s",
-                client_idx + 1, chat_id, e
+                account_no, chat_id, e
             )
             failed_error = e
 
@@ -229,7 +244,7 @@ async def iter_messages_rotating_clients(
             continue
 
         if failed_error is not None:
-            if client_idx + 1 < len(clients):
+            if len(clients) > 1 and client_idx + 1 < len(clients):
                 client_idx += 1
                 continue
             raise failed_error
@@ -552,11 +567,122 @@ async def set_skip_number(bot, message):
         )
 
 
+@Client.on_message(
+    filters.private & filters.command('resumeindex') & filters.user(ADMINS)
+)
+async def resume_index(bot, message):
+    """
+    Resume an indexing job that got interrupted (e.g. by a bot
+    restart/redeploy) without rescanning messages already covered.
+
+    Asks for the channel (same as /index) plus the Telegram message
+    ID you last got up to, then starts scanning right after that
+    message instead of from the newest one in the chat.
+    """
+
+    vj = await bot.ask(
+        message.chat.id,
+        "**Send me the channel's last post link, or forward the last "
+        "message from the channel (same as /index).**"
+    )
+
+    if (
+        vj.forward_from_chat
+        and vj.forward_from_chat.type == enums.ChatType.CHANNEL
+    ):
+
+        last_msg_id = vj.forward_from_message_id
+
+        chat_id = (
+            vj.forward_from_chat.username
+            or vj.forward_from_chat.id
+        )
+
+    elif vj.text:
+
+        regex = re.compile(
+            r"(https://)?"
+            r"(t\.me/|telegram\.me/|telegram\.dog/)"
+            r"(c/)?"
+            r"(\d+|[a-zA-Z_0-9]+)/"
+            r"(\d+)$"
+        )
+
+        match = regex.match(vj.text)
+
+        if not match:
+            return await vj.reply(
+                'Invalid link\n\nTry again by /resumeindex'
+            )
+
+        chat_id = match.group(4)
+        last_msg_id = int(match.group(5))
+
+        if chat_id.isnumeric():
+            chat_id = int("-100" + chat_id)
+
+    else:
+        return
+
+    resume_msg = await bot.ask(
+        message.chat.id,
+        "**Now send me the message ID to resume AFTER "
+        "(the last message ID that was already indexed — "
+        "check your logs/progress message for this).**"
+    )
+
+    try:
+        start_offset_id = int(resume_msg.text.strip())
+    except Exception:
+        return await resume_msg.reply(
+            "That doesn't look like a number. Try /resumeindex again."
+        )
+
+    if lock.locked():
+        return await message.reply(
+            'Wait until previous process complete.'
+        )
+
+    index_client = await get_index_client(bot, chat_id=chat_id)
+
+    try:
+        await index_client.get_chat(chat_id)
+    except Exception as e:
+        logger.exception(e)
+        return await message.reply(
+            f'Cannot access this channel — {e}'
+        )
+
+    status_msg = await message.reply(
+        f"Resuming indexing of <code>{chat_id}</code> "
+        f"after message <code>{start_offset_id}</code>...",
+        reply_markup=InlineKeyboardMarkup(
+            [[
+                InlineKeyboardButton(
+                    'Cancel',
+                    callback_data='index_cancel'
+                )
+            ]]
+        )
+    )
+
+    asyncio.create_task(
+        index_files_to_db(
+            last_msg_id,
+            chat_id,
+            status_msg,
+            index_client,
+            start_offset_id=start_offset_id
+        )
+    )
+
+
 async def index_files_to_db(
     lst_msg_id,
     chat,
     msg,
-    client
+    client,
+    start_offset_id=0
 ):
     """
     Index files, spreading the work across all configured user
@@ -567,6 +693,11 @@ async def index_files_to_db(
     `client` (usually the bot, or whichever session was already
     confirmed to have access) is only used as a fallback when no
     SESSION_STRINGs are configured at all.
+
+    start_offset_id resumes an interrupted run: pass the Telegram
+    message ID you last got up to and scanning starts right after it
+    instead of from the newest message in the chat. Leave 0 for a
+    normal full index.
     """
 
     total_files = 0
@@ -594,6 +725,12 @@ async def index_files_to_db(
                     len(clients), quota
                 )
 
+            if start_offset_id:
+                logger.info(
+                    "Resuming index of chat %s after message %s",
+                    chat, start_offset_id
+                )
+
             # IMPORTANT:
             # Do NOT call client.iter_messages() directly.
             # Use the rotating compatibility iterator so, when multiple
@@ -604,21 +741,12 @@ async def index_files_to_db(
                 chat,
                 limit=lst_msg_id,
                 min_message_id=temp.CURRENT,
-                quota=quota
+                quota=quota,
+                start_offset_id=start_offset_id
             )
 
             saved_flag = None
             accounts_used = 1
-            edit_cooldown_until = 0
-            last_edit_time = 0
-
-            # Tuned for very large indexing runs (700k+ files). At this
-            # scale, editing too often adds up to thousands of calls over
-            # a multi-hour job - so we update rarely and enforce a solid
-            # minimum gap between edits to stay well clear of Telegram's
-            # flood limits.
-            PROGRESS_INTERVAL = 1000  # messages between progress edits
-            MIN_EDIT_GAP = 15         # seconds - minimum time between edits
 
             while True:
 
@@ -661,15 +789,15 @@ async def index_files_to_db(
                 if current % 5 == 0:
                     await asyncio.sleep(0.05)
 
-                # Update progress every PROGRESS_INTERVAL messages (unless
-                # we're still in a FloodWait cooldown from a previous edit
-                # attempt, or it's been less than MIN_EDIT_GAP seconds
-                # since the last edit).
-                if (
-                    current % PROGRESS_INTERVAL == 0
-                    and time.time() >= edit_cooldown_until
-                    and time.time() - last_edit_time >= MIN_EDIT_GAP
-                ):
+                # Update progress every 30 messages.
+                if current % 30 == 0:
+
+                    logger.info(
+                        "Checkpoint: last message id %s "
+                        "(fetched=%s saved=%s) — use this id with "
+                        "/resumeindex if the job gets interrupted",
+                        message.id, current, total_files
+                    )
 
                     can = [[
                         InlineKeyboardButton(
@@ -713,25 +841,9 @@ async def index_files_to_db(
                             reply_markup=reply
                         )
 
-                        last_edit_time = time.time()
-
                     except MessageNotModified:
 
                         pass
-
-                    except FloodWait as e:
-
-                        # Telegram is throttling edits right now. Don't block
-                        # the whole indexing loop waiting it out - just skip
-                        # progress updates until the cooldown passes, and
-                        # keep saving files in the meantime.
-                        edit_cooldown_until = time.time() + e.value
-
-                        logger.warning(
-                            f"FloodWait during indexing progress update: "
-                            f"pausing edits for {e.value}s "
-                            f"(still saving files in background)"
-                        )
 
                 # Deleted/empty message.
                 if message.empty:
@@ -795,59 +907,35 @@ async def index_files_to_db(
 
             logger.exception(e)
 
-            try:
+            k = await msg.edit(
+                f'Error: {e}'
+            )
 
-                k = await msg.edit(
-                    f'Error: {e}'
-                )
-
-                await k.reply_text(
-                    f'Saved <code>{total_files}</code> to dataBase!\n'
-                    f'Duplicate Files Skipped: '
-                    f'<code>{duplicate}</code>\n'
-                    f'Deleted Messages Skipped: '
-                    f'<code>{deleted}</code>\n'
-                    f'Non-Media messages skipped: '
-                    f'<code>{no_media + unsupported}</code> '
-                    f'(Unsupported Media - `{unsupported}` )\n'
-                    f'Errors Occurred: '
-                    f'<code>{errors}</code>'
-                )
-
-            except FloodWait as fw:
-
-                # Can't edit/reply right now either - just log the final
-                # counts so they aren't lost.
-                logger.warning(
-                    f"FloodWait ({fw.value}s) while reporting indexing "
-                    f"error/result. Saved={total_files} "
-                    f"Duplicate={duplicate} Deleted={deleted} "
-                    f"NonMedia={no_media + unsupported} Errors={errors}"
-                )
+            await k.reply_text(
+                f'Saved <code>{total_files}</code> to dataBase!\n'
+                f'Duplicate Files Skipped: '
+                f'<code>{duplicate}</code>\n'
+                f'Deleted Messages Skipped: '
+                f'<code>{deleted}</code>\n'
+                f'Non-Media messages skipped: '
+                f'<code>{no_media + unsupported}</code> '
+                f'(Unsupported Media - `{unsupported}` )\n'
+                f'Errors Occurred: '
+                f'<code>{errors}</code>'
+            )
 
         else:
 
-            try:
-
-                await msg.edit(
-                    f'Successfully saved '
-                    f'<code>{total_files}</code> files to dataBase!\n'
-                    f'Duplicate Files Skipped: '
-                    f'<code>{duplicate}</code>\n'
-                    f'Deleted Messages Skipped: '
-                    f'<code>{deleted}</code>\n'
-                    f'Non-Media messages skipped: '
-                    f'<code>{no_media + unsupported}</code> '
-                    f'(Unsupported Media - `{unsupported}` )\n'
-                    f'Errors Occurred: '
-                    f'<code>{errors}</code>'
-                )
-
-            except FloodWait as fw:
-
-                logger.warning(
-                    f"FloodWait ({fw.value}s) while reporting indexing "
-                    f"completion. Saved={total_files} "
-                    f"Duplicate={duplicate} Deleted={deleted} "
-                    f"NonMedia={no_media + unsupported} Errors={errors}"
-                )
+            await msg.edit(
+                f'Successfully saved '
+                f'<code>{total_files}</code> files to dataBase!\n'
+                f'Duplicate Files Skipped: '
+                f'<code>{duplicate}</code>\n'
+                f'Deleted Messages Skipped: '
+                f'<code>{deleted}</code>\n'
+                f'Non-Media messages skipped: '
+                f'<code>{no_media + unsupported}</code> '
+                f'(Unsupported Media - `{unsupported}` )\n'
+                f'Errors Occurred: '
+                f'<code>{errors}</code>'
+            )
