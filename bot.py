@@ -29,7 +29,7 @@ from TechVJ.util.keepalive import ping_server
 from TechVJ.bot.clients import initialize_clients
 
 ppath = "plugins/*.py"
-files = glob.glob(ppath)
+files = sorted(glob.glob(ppath))
 
 TechVJBot.start()
 print("✅ Bot Client Started")
