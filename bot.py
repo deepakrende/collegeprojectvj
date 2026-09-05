@@ -32,6 +32,7 @@ ppath = "plugins/*.py"
 files = glob.glob(ppath)
 
 TechVJBot.start()
+print("✅ Bot Client Started")
 
 # ✅ Start user client(s) if any SESSION_STRING(s) are set.
 # Supports multiple sessions (SESSION_STRING1, SESSION_STRING2, ...) so
@@ -152,7 +153,9 @@ async def start():
         print("Restarting All Clone Bots.......")
         await restart_bots()
         print("Restarted All Clone Bots.")
+        print("✅ Reached idle() - bot is now waiting for Telegram updates")
     await idle()
+    print("🛑 idle() exited")
 
 
 if __name__ == '__main__':
