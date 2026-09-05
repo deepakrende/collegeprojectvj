@@ -20,7 +20,7 @@ from info import *
 from utils import temp
 from Script import script
 from datetime import date, datetime
-from aiohttp import web
+from aiohttp import ClientSession, web
 from plugins import web_server
 from plugins.clone import restart_bots
 
@@ -74,42 +74,45 @@ else:
 loop = asyncio.get_event_loop()
 
 
-async def cache_configured_chat_peers():
-    """Populate Pyrogram's peer cache for configured channels.
+async def send_restart_notice(text):
+    """Send the startup notice, including on fresh ephemeral bot sessions.
 
-    A newly-created/ephemeral bot session knows a numeric channel ID but not
-    Telegram's access hash for it. In that case Pyrogram resolves the ID with
-    an empty access hash and raises CHANNEL_INVALID even though the bot is an
-    administrator. Dialogs contain the valid peer data, so load them once at
-    startup before using the configured channel IDs.
+    Pyrogram uses MTProto and needs a cached access hash for a numeric channel
+    ID. Fresh bot sessions may not have one and receive CHANNEL_INVALID even
+    when the bot is an administrator. Telegram's Bot API accepts the numeric
+    chat ID directly, so use it as the fallback.
     """
-    configured_chats = {LOG_CHANNEL, *CHANNELS}
-    if AUTH_CHANNEL:
-        configured_chats.add(AUTH_CHANNEL)
-    configured_chats.discard(None)
-
-    if not configured_chats:
-        return
-
-    found_chats = set()
     try:
-        async for dialog in TechVJBot.get_dialogs():
-            chat_id = dialog.chat.id
-            if chat_id in configured_chats:
-                found_chats.add(chat_id)
-                logging.info("Cached Telegram peer for configured chat %s", chat_id)
-                if found_chats == configured_chats:
-                    break
-    except Exception:
-        logging.exception("Could not preload configured Telegram channel peers")
+        await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=text)
+        logging.info("Sent restart notice to log channel %s via Pyrogram", LOG_CHANNEL)
         return
-
-    missing_chats = configured_chats - found_chats
-    if missing_chats:
+    except Exception:
         logging.warning(
-            "Configured chats not visible to this bot account: %s. "
-            "Verify that the BOT_TOKEN belongs to the bot added to these chats.",
-            sorted(missing_chats),
+            "Pyrogram could not resolve log channel %s; trying the Telegram Bot API.",
+            LOG_CHANNEL,
+            exc_info=True,
+        )
+
+    try:
+        api_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        payload = {
+            "chat_id": str(LOG_CHANNEL),
+            "text": text,
+            "parse_mode": "HTML",
+        }
+        async with ClientSession() as session:
+            async with session.post(api_url, json=payload) as response:
+                result = await response.json(content_type=None)
+
+        if not result.get("ok"):
+            raise RuntimeError(result.get("description", "Unknown Bot API error"))
+
+        logging.info("Sent restart notice to log channel %s via Bot API", LOG_CHANNEL)
+    except Exception:
+        logging.exception(
+            "Could not send restart notice to log channel %s via Pyrogram or "
+            "the Telegram Bot API.",
+            LOG_CHANNEL,
         )
 
 
@@ -162,8 +165,6 @@ async def start():
     temp.U_NAME = me.username
     temp.B_NAME = me.first_name
     logging.info("Connected to Telegram as @%s (ID: %s)", me.username, me.id)
-
-    await cache_configured_chat_peers()
     
     logging.info(script.LOGO)
     
@@ -173,21 +174,7 @@ async def start():
     now = datetime.now(tz)
     time = now.strftime("%H:%M:%S %p")
 
-    try:
-        await TechVJBot.send_message(
-            chat_id=LOG_CHANNEL,
-            text=script.RESTART_TXT.format(today, time),
-        )
-        logging.info("Sent restart notice to log channel %s", LOG_CHANNEL)
-    except Exception:
-        # Keep the bot available even when the log channel is misconfigured,
-        # but preserve Telegram's actual error in the service logs.
-        logging.exception(
-            "Could not send restart notice to log channel %s. "
-            "Confirm the channel ID is correct and the bot is an admin with "
-            "permission to post messages.",
-            LOG_CHANNEL,
-        )
+    await send_restart_notice(script.RESTART_TXT.format(today, time))
     
     for ch in CHANNELS:
         try:
