@@ -338,7 +338,8 @@ async def index_files(bot, query):
             int(lst_msg_id),
             chat,
             msg,
-            index_client
+            index_client,
+            bot=bot
         )
     )
 
@@ -690,6 +691,7 @@ async def resume_index(bot, message):
             chat_id,
             status_msg,
             index_client,
+            bot=bot,
             start_offset_id=start_offset_id
         )
     )
@@ -700,6 +702,7 @@ async def index_files_to_db(
     chat,
     msg,
     client,
+    bot=None,
     start_offset_id=0
 ):
     """
@@ -712,11 +715,24 @@ async def index_files_to_db(
     confirmed to have access) is only used as a fallback when no
     SESSION_STRINGs are configured at all.
 
+    `bot` is the actual bot client. A Telegram file_id belongs to
+    whichever account originally fetched it and can't be reused by a
+    different account — so when a message is fetched by a user
+    session the bot itself has no access to, that file_id would never
+    work when the bot later tries to deliver the file. To fix that,
+    each such message is copied into LOG_CHANNEL (which the bot must
+    be an admin of) by the session that has access, and the bot's own
+    copy of it is what actually gets saved to the database. Pass the
+    real bot client explicitly; if omitted, it falls back to `client`
+    for backward compatibility, but that only works correctly when
+    `client` really is the bot.
+
     start_offset_id resumes an interrupted run: pass the Telegram
     message ID you last got up to and scanning starts right after it
     instead of from the newest message in the chat. Leave 0 for a
     normal full index.
     """
+    bot = bot or client
 
     total_files = 0
     duplicate = 0
@@ -900,7 +916,65 @@ async def index_files_to_db(
 
                     continue
 
-                media.caption = message.caption
+                caption = message.caption
+
+                # A file_id belongs to whichever account fetched it and
+                # can't be reused by a different one. If this message
+                # came from a user session rather than the bot itself,
+                # the bot could never actually send it later using this
+                # file_id. Have that session copy it into LOG_CHANNEL
+                # (the bot must be an admin there), then read the bot's
+                # own copy back — that copy's file_id is one the bot can
+                # actually use.
+                if active_client is not bot:
+
+                    try:
+
+                        copied = await active_client.copy_message(
+                            chat_id=LOG_CHANNEL,
+                            from_chat_id=chat,
+                            message_id=message.id
+                        )
+
+                        bot_message = await bot.get_messages(
+                            LOG_CHANNEL,
+                            copied.id
+                        )
+
+                        media = getattr(
+                            bot_message,
+                            bot_message.media.value,
+                            None
+                        )
+
+                        if not media:
+
+                            unsupported += 1
+
+                            continue
+
+                    except FloodWait as e:
+
+                        await asyncio.sleep(e.value)
+
+                        errors += 1
+
+                        continue
+
+                    except Exception as e:
+
+                        logger.warning(
+                            "Could not copy message %s from %s into "
+                            "LOG_CHANNEL so the bot can access it "
+                            "(is the bot an admin there?): %s",
+                            message.id, chat, e
+                        )
+
+                        errors += 1
+
+                        continue
+
+                media.caption = caption
 
                 aynav, vnay = await save_file(
                     media
