@@ -78,7 +78,14 @@ async def pm_text(bot, message):
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
-    if content.startswith("/") or content.startswith("#"): return  # ignore commands and hashtags
+    if content.startswith("/") or content.startswith("#"):
+        # Don't just return: a matched filter stops Pyrogram from trying
+        # any other handler for this update unless told otherwise, so a
+        # bare `return` here would silently swallow /start and every other
+        # command if this handler ever ends up registered before the
+        # command handlers. continue_propagation() lets commands.py (and
+        # anything else) still get a chance to handle it.
+        return message.continue_propagation()
     if PM_SEARCH == True:
         ai_search = True
         reply_msg = await bot.send_message(message.from_user.id, f"<b><i>Searching For {content} 🔍</i></b>", reply_to_message_id=message.id)
