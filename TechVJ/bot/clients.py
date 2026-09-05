@@ -38,8 +38,23 @@ async def initialize_clients():
         except Exception:
             logging.error(f"Failed starting Client - {client_id} Error:", exc_info=True)
     
-    clients = await asyncio.gather(*[start_client(i, token) for i, token in all_tokens.items()])
+    # A bad or expired optional bot token must not prevent the primary bot
+    # from starting. ``start_client`` returns None when that particular
+    # client cannot connect, so discard failed results before updating the
+    # client map (``dict([None])`` raises TypeError and used to abort startup).
+    results = await asyncio.gather(
+        *[start_client(i, token) for i, token in all_tokens.items()]
+    )
+    clients = [result for result in results if result is not None]
     multi_clients.update(dict(clients))
+
+    failed_count = len(results) - len(clients)
+    if failed_count:
+        logging.warning(
+            "Skipped %s additional client(s) that could not be started; "
+            "the primary bot will continue running.",
+            failed_count,
+        )
     if len(multi_clients) != 1:
         MULTI_CLIENT = True
         print("Multi-Client Mode Enabled")
