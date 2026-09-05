@@ -5,7 +5,7 @@
 import os, string, logging, random, asyncio, time, datetime, re, sys, json, base64
 from Script import script
 from pyrogram import Client, filters, enums
-from pyrogram.errors import ChatAdminRequired, FloodWait
+from pyrogram.errors import ChatAdminRequired, FloodWait, MediaEmpty, FileReferenceExpired, FileIdInvalid
 from pyrogram.types import *
 from database.ia_filterdb import col, sec_col, get_file_details, unpack_new_file_id, get_bad_files
 from database.users_chats_db import db, delete_all_referal_users, get_referal_users_count, get_referal_all_users, referal_add_user
@@ -459,13 +459,34 @@ async def start(client, message):
                 reply_markup=InlineKeyboardMarkup(button)
             else:
                 reply_markup = None
-            msg = await client.send_cached_media(
-                chat_id=message.from_user.id,
-                file_id=file_id,
-                caption=f_caption,
-                protect_content=True if pre == 'allfilesp' else False,
-                reply_markup=reply_markup
-            )
+            try:
+                msg = await client.send_cached_media(
+                    chat_id=message.from_user.id,
+                    file_id=file_id,
+                    caption=f_caption,
+                    protect_content=True if pre == 'allfilesp' else False,
+                    reply_markup=reply_markup
+                )
+            except FloodWait as e:
+                await asyncio.sleep(e.value)
+                msg = await client.send_cached_media(
+                    chat_id=message.from_user.id,
+                    file_id=file_id,
+                    caption=f_caption,
+                    protect_content=True if pre == 'allfilesp' else False,
+                    reply_markup=reply_markup
+                )
+            except (MediaEmpty, FileReferenceExpired, FileIdInvalid) as e:
+                logger.warning(
+                    "Broken/expired file_id for %s (%s) — removing from DB",
+                    file_id, e
+                )
+                await col.delete_one({'file_id': file_id})
+                await sec_col.delete_one({'file_id': file_id})
+                continue
+            except Exception:
+                logger.exception("Failed to send file %s in batch", file_id)
+                continue
             filesarr.append(msg)
         k = await client.send_message(chat_id = message.from_user.id, text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nᴛʜɪs ᴍᴇssᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ɪɴ <b><u>10 mins</u> 🫥 <i></b>(ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs)</i>.\n\n<b><i>ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ.</i></b></blockquote>")
         await asyncio.sleep(600)
@@ -580,13 +601,42 @@ async def start(client, message):
         reply_markup=InlineKeyboardMarkup(button)
     else:
         reply_markup = None
-    msg = await client.send_cached_media(
-        chat_id=message.from_user.id,
-        file_id=file_id,
-        caption=f_caption,
-        protect_content=True if pre == 'filep' else False,
-        reply_markup=reply_markup
-    )
+    try:
+        msg = await client.send_cached_media(
+            chat_id=message.from_user.id,
+            file_id=file_id,
+            caption=f_caption,
+            protect_content=True if pre == 'filep' else False,
+            reply_markup=reply_markup
+        )
+    except FloodWait as e:
+        await asyncio.sleep(e.value)
+        msg = await client.send_cached_media(
+            chat_id=message.from_user.id,
+            file_id=file_id,
+            caption=f_caption,
+            protect_content=True if pre == 'filep' else False,
+            reply_markup=reply_markup
+        )
+    except (MediaEmpty, FileReferenceExpired, FileIdInvalid) as e:
+        logger.warning(
+            "Broken/expired file_id for %s (%s) — removing from DB",
+            file_id, e
+        )
+        await col.delete_one({'file_id': file_id})
+        await sec_col.delete_one({'file_id': file_id})
+        return await message.reply(
+            "<b>❌ Sorry, this file is no longer available "
+            "(it may have been deleted from the source).</b>\n\n"
+            "Please try searching again — it's been removed from "
+            "results so this won't happen again for this file."
+        )
+    except Exception as e:
+        logger.exception("Failed to send file %s", file_id)
+        return await message.reply(
+            "<b>❌ Something went wrong sending that file. "
+            "Please try again in a moment.</b>"
+        )
     btn = [[InlineKeyboardButton("✅ ɢᴇᴛ ғɪʟᴇ ᴀɢᴀɪɴ ✅", callback_data=f'del#{file_id}')]]
     k = await msg.reply(text=f"<blockquote><b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nᴛʜɪs ᴍᴇssᴀɢᴇ ᴡɪʟʟ ʙᴇ ᴅᴇʟᴇᴛᴇᴅ ɪɴ <b><u>10 mins</u> 🫥 <i></b>(ᴅᴜᴇ ᴛᴏ ᴄᴏᴘʏʀɪɢʜᴛ ɪssᴜᴇs)</i>.\n\n<b><i>ᴘʟᴇᴀsᴇ ғᴏʀᴡᴀʀᴅ ᴛʜɪs ᴍᴇssᴀɢᴇ ᴛᴏ ʏᴏᴜʀ sᴀᴠᴇᴅ ᴍᴇssᴀɢᴇs ᴏʀ ᴀɴʏ ᴘʀɪᴠᴀᴛᴇ ᴄʜᴀᴛ.</i></b></blockquote>")
     await asyncio.sleep(600)
