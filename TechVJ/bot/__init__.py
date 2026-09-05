@@ -19,7 +19,6 @@ class TechVJXBot(Client):
             bot_token=BOT_TOKEN,
             session_string=BOT_SESSION_STRING,
             workers=150,
-            plugins={"root": "plugins"},
             sleep_threshold=5,
         )
 
