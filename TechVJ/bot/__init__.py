@@ -17,6 +17,7 @@ class TechVJXBot(Client):
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
+            session_string=BOT_SESSION_STRING,
             workers=150,
             plugins={"root": "plugins"},
             sleep_threshold=5,
