@@ -74,6 +74,23 @@ else:
 loop = asyncio.get_event_loop()
 
 
+def register_plugin_handlers(plugin_module):
+    """Attach class-decorated Pyrogram handlers to the running bot client.
+
+    ``@Client.on_message(...)`` used in this project stores handler metadata
+    on the decorated function. The built-in Pyrogram plugin loader normally
+    registers that metadata, but these modules are loaded manually below.
+    Without this step the bot connects successfully but has no update handlers
+    and therefore cannot respond to /start or any other command.
+    """
+    handler_count = 0
+    for value in vars(plugin_module).values():
+        for handler, group in getattr(value, "handlers", []):
+            TechVJBot.add_handler(handler, group)
+            handler_count += 1
+    return handler_count
+
+
 async def send_restart_notice(text):
     """Send the startup notice, including on fresh ephemeral bot sessions.
 
@@ -116,6 +133,15 @@ async def send_restart_notice(text):
         )
 
 
+async def restart_clone_bots_in_background():
+    """Restore optional clone bots without delaying the primary bot."""
+    try:
+        await restart_bots()
+        logging.info("Finished restarting clone bots")
+    except Exception:
+        logging.exception("Clone-bot restart failed; primary bot remains available")
+
+
 async def start():
     print('\n🚀 Initializing Your Bot')
 
@@ -148,7 +174,12 @@ async def start():
             load = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(load)
             sys.modules["plugins." + plugin_name] = load
-            print("Tech VJ Imported => " + plugin_name)
+            handler_count = register_plugin_handlers(load)
+            logging.info(
+                "Imported plugin %s and registered %s handler(s)",
+                plugin_name,
+                handler_count,
+            )
 
 # Keep alive (optional)
     if ON_HEROKU:
@@ -187,13 +218,12 @@ async def start():
     
     # Clone bots
     if CLONE_MODE:
-        print("Restarting All Clone Bots.......")
-        await restart_bots()
-        print("Restarted All Clone Bots.")
+        logging.info("Starting clone-bot restoration in the background")
+        asyncio.create_task(restart_clone_bots_in_background())
 
-    print("✅ Reached idle() - bot is now waiting for Telegram updates")
+    logging.info("Bot is ready and waiting for Telegram updates")
     await idle()
-    print("🛑 idle() exited")
+    logging.info("Bot idle() exited")
 
 
 if __name__ == '__main__':
