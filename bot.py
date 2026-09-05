@@ -149,14 +149,14 @@ async def start():
         print("Make Your Bot Admin In Force Subscribe Channel With Full Rights")
     
     # Clone bots
-    if CLONE_MODE:
+if CLONE_MODE:
     print("Restarting All Clone Bots.......")
     await restart_bots()
     print("Restarted All Clone Bots.")
 
-    print("✅ Reached idle() - bot is now waiting for Telegram updates")
-    await idle()
-    print("🛑 idle() exited")
+print("✅ Reached idle() - bot is now waiting for Telegram updates")
+await idle()
+print("🛑 idle() exited")
 
 
 if __name__ == '__main__':
