@@ -131,9 +131,20 @@ async def start():
     time = now.strftime("%H:%M:%S %p")
 
     try:
-        await TechVJBot.send_message(chat_id=LOG_CHANNEL, text=script.RESTART_TXT.format(today, time))
-    except:
-        print("Make Your Bot Admin In Log Channel With Full Rights")
+        await TechVJBot.send_message(
+            chat_id=LOG_CHANNEL,
+            text=script.RESTART_TXT.format(today, time),
+        )
+        logging.info("Sent restart notice to log channel %s", LOG_CHANNEL)
+    except Exception:
+        # Keep the bot available even when the log channel is misconfigured,
+        # but preserve Telegram's actual error in the service logs.
+        logging.exception(
+            "Could not send restart notice to log channel %s. "
+            "Confirm the channel ID is correct and the bot is an admin with "
+            "permission to post messages.",
+            LOG_CHANNEL,
+        )
     
     for ch in CHANNELS:
         try:
@@ -164,4 +175,7 @@ if __name__ == '__main__':
         loop.run_until_complete(start())
     except KeyboardInterrupt:
         logging.info('Service Stopped Bye 👋')
+    except Exception:
+        logging.exception('Fatal error during bot startup')
+        raise
     
