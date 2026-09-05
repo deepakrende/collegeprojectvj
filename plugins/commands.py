@@ -481,8 +481,8 @@ async def start(client, message):
                     "Broken/expired file_id for %s (%s) — removing from DB",
                     file_id, e
                 )
-                await col.delete_one({'file_id': file_id})
-                await sec_col.delete_one({'file_id': file_id})
+                col.delete_one({'file_id': file_id})
+                sec_col.delete_one({'file_id': file_id})
                 continue
             except Exception:
                 logger.exception("Failed to send file %s in batch", file_id)
@@ -623,8 +623,8 @@ async def start(client, message):
             "Broken/expired file_id for %s (%s) — removing from DB",
             file_id, e
         )
-        await col.delete_one({'file_id': file_id})
-        await sec_col.delete_one({'file_id': file_id})
+        col.delete_one({'file_id': file_id})
+        sec_col.delete_one({'file_id': file_id})
         return await message.reply(
             "<b>❌ Sorry, this file is no longer available "
             "(it may have been deleted from the source).</b>\n\n"
