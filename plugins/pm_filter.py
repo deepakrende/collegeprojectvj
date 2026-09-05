@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import os, logging, string, asyncio, time, re, ast, random, math, pytz, pyrogram
+import os, logging, string, asyncio, time, re, ast, random, math, pytz
 from datetime import datetime, timedelta, date, time
 from Script import script
 from info import *
@@ -3286,4 +3286,3 @@ async def global_filters(client, message, text=False):
                 break
     else:
         return False
-
