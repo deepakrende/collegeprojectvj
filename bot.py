@@ -176,18 +176,14 @@ async def start():
 
     await send_restart_notice(script.RESTART_TXT.format(today, time))
     
-    for ch in CHANNELS:
-        try:
-            k = await TechVJBot.send_message(chat_id=ch, text="**Bot Restarted**")
-            await k.delete()
-        except:
-            print("Make Your Bot Admin In File Channels With Full Rights")
-    
-    try:
-        k = await TechVJBot.send_message(chat_id=AUTH_CHANNEL, text="**Bot Restarted**")
-        await k.delete()
-    except:
-        print("Make Your Bot Admin In Force Subscribe Channel With Full Rights")
+    # Do not send/delete startup test messages in file or force-subscribe
+    # channels. Fresh Pyrogram sessions can spend time resolving these numeric
+    # IDs, delaying the main bot from reaching idle().
+    logging.info(
+        "Startup complete; configured %s file channel(s)%s.",
+        len(CHANNELS),
+        " and a force-subscribe channel" if AUTH_CHANNEL else "",
+    )
     
     # Clone bots
     if CLONE_MODE:
