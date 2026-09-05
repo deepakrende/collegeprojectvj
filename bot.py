@@ -73,6 +73,46 @@ else:
 
 loop = asyncio.get_event_loop()
 
+
+async def cache_configured_chat_peers():
+    """Populate Pyrogram's peer cache for configured channels.
+
+    A newly-created/ephemeral bot session knows a numeric channel ID but not
+    Telegram's access hash for it. In that case Pyrogram resolves the ID with
+    an empty access hash and raises CHANNEL_INVALID even though the bot is an
+    administrator. Dialogs contain the valid peer data, so load them once at
+    startup before using the configured channel IDs.
+    """
+    configured_chats = {LOG_CHANNEL, *CHANNELS}
+    if AUTH_CHANNEL:
+        configured_chats.add(AUTH_CHANNEL)
+    configured_chats.discard(None)
+
+    if not configured_chats:
+        return
+
+    found_chats = set()
+    try:
+        async for dialog in TechVJBot.get_dialogs():
+            chat_id = dialog.chat.id
+            if chat_id in configured_chats:
+                found_chats.add(chat_id)
+                logging.info("Cached Telegram peer for configured chat %s", chat_id)
+                if found_chats == configured_chats:
+                    break
+    except Exception:
+        logging.exception("Could not preload configured Telegram channel peers")
+        return
+
+    missing_chats = configured_chats - found_chats
+    if missing_chats:
+        logging.warning(
+            "Configured chats not visible to this bot account: %s. "
+            "Verify that the BOT_TOKEN belongs to the bot added to these chats.",
+            sorted(missing_chats),
+        )
+
+
 async def start():
     print('\n🚀 Initializing Your Bot')
 
@@ -121,6 +161,9 @@ async def start():
     temp.ME = me.id
     temp.U_NAME = me.username
     temp.B_NAME = me.first_name
+    logging.info("Connected to Telegram as @%s (ID: %s)", me.username, me.id)
+
+    await cache_configured_chat_peers()
     
     logging.info(script.LOGO)
     
