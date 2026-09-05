@@ -85,7 +85,23 @@ def register_plugin_handlers(plugin_module):
     """
     handler_count = 0
     for value in vars(plugin_module).values():
-        for handler, group in getattr(value, "handlers", []):
+        # ``getattr(value, "handlers", [])`` can return something other than
+        # a list of (handler, group) tuples if a plugin's module-level name
+        # happens to collide with an unrelated object that also has a
+        # ``.handlers`` attribute (e.g. a bare ``import pyrogram`` binds the
+        # ``pyrogram`` package, which itself has a ``handlers`` submodule;
+        # the same can happen with ``logging`` once ``logging.handlers`` has
+        # been imported anywhere in the process). Only treat it as handler
+        # metadata when it's actually a list/tuple of 2-tuples, and skip
+        # anything else instead of crashing the whole bot on startup.
+        handlers = getattr(value, "handlers", None)
+        if not isinstance(handlers, (list, tuple)):
+            continue
+        for entry in handlers:
+            try:
+                handler, group = entry
+            except (TypeError, ValueError):
+                continue
             TechVJBot.add_handler(handler, group)
             handler_count += 1
     return handler_count
@@ -234,4 +250,3 @@ if __name__ == '__main__':
     except Exception:
         logging.exception('Fatal error during bot startup')
         raise
-    
