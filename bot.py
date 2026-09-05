@@ -150,10 +150,11 @@ async def start():
     
     # Clone bots
     if CLONE_MODE:
-        print("Restarting All Clone Bots.......")
-        await restart_bots()
-        print("Restarted All Clone Bots.")
-        print("✅ Reached idle() - bot is now waiting for Telegram updates")
+    print("Restarting All Clone Bots.......")
+    await restart_bots()
+    print("Restarted All Clone Bots.")
+
+    print("✅ Reached idle() - bot is now waiting for Telegram updates")
     await idle()
     print("🛑 idle() exited")
 
