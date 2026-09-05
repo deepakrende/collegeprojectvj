@@ -2,7 +2,7 @@
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-import logging, re, asyncio
+import logging, re, asyncio, time
 from utils import temp
 from info import ADMINS, SESSION_SWITCH_LIMIT
 from pyrogram import Client, filters, enums
@@ -20,6 +20,109 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 lock = asyncio.Lock()
+
+# Small pause after every copy_message() call into the storage channel,
+# to stay well under Telegram's per-chat rate limit and avoid tripping
+# FloodWait in the first place.
+COPY_TO_STORAGE_DELAY = 1.2
+
+# Tracks, per account, the unix timestamp before which it shouldn't be
+# used again after hitting a FloodWait while copying into the storage
+# channel. Keyed by id(client) since Pyrogram Client objects aren't
+# hashable/comparable in a useful way otherwise.
+_account_cooldowns = {}
+
+
+def _account_available_at(client):
+    return _account_cooldowns.get(id(client), 0)
+
+
+async def copy_via_available_account(clients, active_client, chat, message_id, log_channel):
+    """
+    Copies a message into the storage channel (log_channel), using
+    active_client if it's available. If active_client is on FloodWait
+    cooldown (or hits a fresh one right now), the other configured
+    accounts are tried instead. If every account is currently cooling
+    down, this waits for whichever one frees up soonest rather than
+    dropping the file - and once an account's cooldown lifts, it's
+    used again like normal.
+
+    Returns (copied_message, client_used).
+    Raises the last error if every account permanently fails on this
+    particular message (non-FloodWait errors, e.g. not a member).
+    """
+    ordered = [active_client] + [c for c in clients if c is not active_client]
+    permanently_failed = set()
+
+    while True:
+        now = time.time()
+
+        candidates = [
+            c for c in ordered
+            if id(c) not in permanently_failed and _account_available_at(c) <= now
+        ]
+
+        if not candidates:
+            still_alive = [c for c in ordered if id(c) not in permanently_failed]
+
+            if not still_alive:
+                raise RuntimeError(
+                    f"All {len(ordered)} account(s) failed to copy "
+                    f"message {message_id}"
+                )
+
+            wait_for = max(
+                min(_account_available_at(c) for c in still_alive) - now,
+                0
+            )
+
+            logger.warning(
+                "All accounts are on FloodWait cooldown for the storage "
+                "channel; waiting %.0fs for one to free up",
+                wait_for
+            )
+
+            await asyncio.sleep(wait_for + 1)
+            continue
+
+        client = candidates[0]
+
+        try:
+            copied = await client.copy_message(
+                chat_id=log_channel,
+                from_chat_id=chat,
+                message_id=message_id
+            )
+
+            return copied, client
+
+        except FloodWait as e:
+            account_no = (
+                clients.index(client) + 1
+                if client in clients else '?'
+            )
+
+            logger.warning(
+                "Account #%s hit a FloodWait (%ss) copying into the "
+                "storage channel; parking it and trying another "
+                "account. It'll be used again automatically once the "
+                "wait lifts.",
+                account_no, e.value
+            )
+
+            _account_cooldowns[id(client)] = time.time() + e.value
+
+            continue
+
+        except Exception as e:
+            logger.warning(
+                "Account failed to copy message %s into storage "
+                "channel: %s", message_id, e
+            )
+
+            permanently_failed.add(id(client))
+
+            continue
 
 
 def _get_user_clients():
@@ -930,11 +1033,18 @@ async def index_files_to_db(
 
                     try:
 
-                        copied = await active_client.copy_message(
-                            chat_id=LOG_CHANNEL,
-                            from_chat_id=chat,
-                            message_id=message.id
+                        copied, used_client = await copy_via_available_account(
+                            clients,
+                            active_client,
+                            chat,
+                            message.id,
+                            LOG_CHANNEL
                         )
+
+                        # Small pause after every copy to stay well under
+                        # Telegram's per-chat rate limit, instead of
+                        # waiting to actually hit a FloodWait.
+                        await asyncio.sleep(COPY_TO_STORAGE_DELAY)
 
                         bot_message = await bot.get_messages(
                             LOG_CHANNEL,
@@ -953,20 +1063,13 @@ async def index_files_to_db(
 
                             continue
 
-                    except FloodWait as e:
-
-                        await asyncio.sleep(e.value)
-
-                        errors += 1
-
-                        continue
-
                     except Exception as e:
 
                         logger.warning(
                             "Could not copy message %s from %s into "
                             "LOG_CHANNEL so the bot can access it "
-                            "(is the bot an admin there?): %s",
+                            "(is the bot an admin there, and are all "
+                            "session accounts members of it?): %s",
                             message.id, chat, e
                         )
 
