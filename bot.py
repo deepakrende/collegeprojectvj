@@ -46,7 +46,14 @@ if SESSION_STRINGS:
                 name=f"UserSession{idx}",
                 api_id=API_ID,
                 api_hash=API_HASH,
-                session_string=s_string
+                session_string=s_string,
+                # 0 = never silently sleep-and-retry on a FloodWait.
+                # Any FloodWait (even a short one) raises immediately
+                # instead of blocking this account for that many
+                # seconds, so the indexing rotation logic can switch
+                # to the next account right away rather than sitting
+                # idle on the flood-limited one.
+                sleep_threshold=0
             )
             client.start()
             UserClients.append(client)
